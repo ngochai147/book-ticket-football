@@ -1,0 +1,40 @@
+import React from 'react';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import MatchesPage from './pages/MatchesPage';
+import NewsPage from './pages/NewsPage';
+import { Route, Routes } from 'react-router-dom';
+import ContactPage from './pages/ContactPage';
+import ShopPage from './pages/ShopPage';
+import ProductDetailPage from './components/Shop/ProductDetailPage';
+import MatchDetailPage from './components/Matches/MatchDetailPage';
+
+function App() {
+  return (
+    <div className="min-h-screen bg-gray-900">
+      <Navbar />
+      <Routes>
+        <Route path='/home' element={<Home />}></Route>
+        <Route path='/matches' element={<MatchesPage />}></Route>
+        <Route path='/matches/:id' element={<MatchDetailPage />}></Route>
+        <Route path='/news' element={<NewsPage />}></Route>
+        <Route path='/shop' element={<ShopPage></ShopPage>}></Route>
+        <Route path='/shop/:id' element={<ProductDetailPage />}></Route>
+        <Route path='/contact' element={<ContactPage></ContactPage>
+        }></Route>
+      </Routes>
+      <Footer />
+      {/* <Home></Home> */}
+      {/* <NewsPage></NewsPage> */}
+
+      {/* <Hero />
+      <LatestResults />
+      <Standings />
+      <ShopSection /> */}
+
+    </div>
+  );
+}
+
+export default App;
