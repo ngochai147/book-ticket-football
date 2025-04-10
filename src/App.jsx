@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from './components/Navbar';
+import Navbar from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import MatchesPage from './pages/MatchesPage';
@@ -9,6 +9,7 @@ import ContactPage from './pages/ContactPage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './components/Shop/ProductDetailPage';
 import MatchDetailPage from './components/Matches/MatchDetailPage';
+import Highlights from './pages/Highlights';
 
 function App() {
   return (
@@ -21,10 +22,11 @@ function App() {
         <Route path='/news' element={<NewsPage />}></Route>
         <Route path='/shop' element={<ShopPage></ShopPage>}></Route>
         <Route path='/shop/:id' element={<ProductDetailPage />}></Route>
-        <Route path='/contact' element={<ContactPage></ContactPage>
-        }></Route>
+        <Route path='/contact' element={<ContactPage></ContactPage>}></Route>
+        <Route path='/highlight' element={<Highlights></Highlights>}></Route>
       </Routes>
       <Footer />
+
       {/* <Home></Home> */}
       {/* <NewsPage></NewsPage> */}
 
