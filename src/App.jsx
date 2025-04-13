@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from './components/Navbar';
+import Navbar from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import MatchesPage from './pages/MatchesPage';
@@ -13,6 +13,9 @@ import ForgotUsername from './pages/ForgotUsernamePage';
 import ForgotPassword from './pages/ForgotPasswordPage';
 import Register from './pages/RegisterPage';
 import WhyRegister from './pages/WhyRegisterPage';
+import UpdateProfile from './pages/UpdateProfilePage';
+import Highlights from './pages/Highlights';
+import ShoppingCart from './pages/CartPage';
 function App() {
   return (
     <div className="min-h-screen bg-gray-900">
@@ -29,8 +32,12 @@ function App() {
         <Route path='/forgot-password' element={<ForgotPassword />}></Route>
         <Route path='/register' element={<Register />}></Route>
         <Route path='/why-register' element={<WhyRegister />}></Route>
+        <Route path='/highlight' element={<Highlights></Highlights>}></Route>
+        <Route path="/update-profile" element={<UpdateProfile />} />
+        <Route path="/shopping-cart" element={<ShoppingCart />} />
       </Routes>
       <Footer />
+
       {/* <Home></Home> */}
       {/* <NewsPage></NewsPage> */}
 

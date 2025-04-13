@@ -1,63 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../services/api";
+import InputField from "./InputField";
+import CheckboxField from "./CheckboxField";
 
 function Register() {
   const [formData, setFormData] = useState({
-    nickname: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    repeatEmail: '',
-    password: '',
-    repeatPassword: '',
-    language: 'English',
-    securityAnswer: '',
+    nickname: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    repeatEmail: "",
+    password: "",
+    repeatPassword: "",
+    language: "English",
+    securityAnswer: "",
     acceptTerms: false,
     acceptNewsletter: false,
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // Thêm state cho modal
+  const navigate = useNavigate();
+
+  // Validation rules
+  const validationRules = {
+    nickname: {
+      regex: /^[a-zA-Z0-9_-]{3,20}$/,
+      message: "Nickname must be 3–20 characters and only contain letters, numbers, _ or -",
+    },
+    email: {
+      regex: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+      message: "Invalid email format",
+    },
+    password: {
+      regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}:"<>?])[A-Za-z\d!@#$%^&*()_+{}:"<>?]{8,}$/,
+      message: "Password must be at least 8 characters, include uppercase, lowercase, number and symbol",
+    },
+  };
 
   const validate = () => {
     const newErrors = {};
 
-    const nicknameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
-    const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}:\"<>?])[A-Za-z\d!@#$%^&*()_+{}:\"<>?]{8,}$/;
+    // Required fields
+    ["nickname", "firstName", "lastName", "email", "password", "securityAnswer"].forEach((field) => {
+      if (!formData[field].trim()) {
+        newErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+      }
+    });
 
-    if (!nicknameRegex.test(formData.nickname)) {
-      newErrors.nickname = 'Nickname must be 3–20 characters and only contain letters, numbers, _ or -.';
+    // Regex validation
+    Object.entries(validationRules).forEach(([field, { regex, message }]) => {
+      if (formData[field] && !regex.test(formData[field])) {
+        newErrors[field] = message;
+      }
+    });
+
+    // Matching fields
+    if (formData.email && formData.repeatEmail && formData.email !== formData.repeatEmail) {
+      newErrors.repeatEmail = "Emails do not match";
     }
-
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required.';
-    }
-
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required.';
-    }
-
-    if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Invalid email format.';
-    }
-
-    if (formData.email !== formData.repeatEmail) {
-      newErrors.repeatEmail = 'Emails do not match.';
-    }
-
-    if (!passwordRegex.test(formData.password)) {
-      newErrors.password = 'Password must be at least 8 characters, include uppercase, lowercase, number and symbol.';
-    }
-
-    if (formData.password !== formData.repeatPassword) {
-      newErrors.repeatPassword = 'Passwords do not match.';
-    }
-
-    if (!formData.securityAnswer.trim()) {
-      newErrors.securityAnswer = 'Security answer is required.';
+    if (formData.password && formData.repeatPassword && formData.password !== formData.repeatPassword) {
+      newErrors.repeatPassword = "Passwords do not match";
     }
 
     if (!formData.acceptTerms) {
-      newErrors.acceptTerms = 'You must accept the terms.';
+      newErrors.acceptTerms = "You must accept the terms";
     }
 
     setErrors(newErrors);
@@ -66,182 +75,187 @@ function Register() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
-      console.log('Form submitted:', formData);
-      alert('Registration submitted!');
+    if (!validate()) return;
+
+    setIsLoading(true);
+    try {
+      const response = await registerUser({
+        nickname: formData.nickname,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        repeatEmail: formData.repeatEmail,
+        password: formData.password,
+        repeatPassword: formData.repeatPassword,
+        language: formData.language,
+        securityAnswer: formData.securityAnswer,
+        acceptTerms: formData.acceptTerms,
+        acceptNewsletter: formData.acceptNewsletter,
+      });
+
+      setShowSuccessModal(true); // Hiển thị modal thành công
+    } catch (err) {
+      setErrors({ submit: err.response?.data?.message || "An error occurred during registration" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const inputClass = (field) =>
-    `w-full border-2 rounded px-3 py-2 focus:outline-none focus:ring-2 ${
-      errors[field] ? 'border-red-500 focus:ring-red-400' : 'border-slate-100 focus:ring-blue-400'
-    }`;
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+    navigate("/login"); // Chuyển hướng sau khi đóng modal
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center p-4">
-      <form onSubmit={handleSubmit} noValidate className="bg-white rounded shadow-lg w-full max-w-2xl p-6 space-y-4">
-        <h2 className="text-white text-lg font-bold bg-[#001f4d] px-4 py-2 rounded">
-          REGISTER FOR FREE NOW
-        </h2>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+      <form onSubmit={handleSubmit} noValidate className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-6">
+        <div className="bg-gradient-to-r from-blue-950 to-blue-900 text-white p-4 rounded-t-xl -m-6 mb-4">
+          <h2 className="text-xl font-bold">Register for Free</h2>
+          <p className="text-sm">Join the world’s largest football community!</p>
+        </div>
 
-        <p className="text-gray-700">
-          Become a member of the world’s largest football community! Fill in the form to register:
-        </p>
+        {errors.submit && (
+          <div className="text-red-500 text-sm p-2 bg-red-100 rounded">{errors.submit}</div>
+        )}
 
-        {/* Nickname */}
-        <div>
-          <input
-            className={inputClass('nickname')}
-            placeholder="Nickname*"
+        <div className="grid grid-cols-1 gap-4">
+          <InputField
             name="nickname"
+            placeholder="Nickname *"
+            value={formData.nickname}
             onChange={handleChange}
+            error={errors.nickname}
           />
-          {errors.nickname && <p className="text-red-500 text-sm mt-1">{errors.nickname}</p>}
-        </div>
-
-        {/* First name */}
-        <div>
-          <input
-            className={inputClass('firstName')}
-            placeholder="First name*"
-            name="firstName"
-            onChange={handleChange}
-          />
-          {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
-        </div>
-
-        {/* Last name */}
-        <div>
-          <input
-            className={inputClass('lastName')}
-            placeholder="Last name*"
-            name="lastName"
-            onChange={handleChange}
-          />
-          {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
-        </div>
-
-        {/* Email */}
-        <div>
-          <input
-            type="email"
-            className={inputClass('email')}
-            placeholder="Email*"
+          <div className="grid grid-cols-2 gap-4">
+            <InputField
+              name="firstName"
+              placeholder="First Name *"
+              value={formData.firstName}
+              onChange={handleChange}
+              error={errors.firstName}
+            />
+            <InputField
+              name="lastName"
+              placeholder="Last Name *"
+              value={formData.lastName}
+              onChange={handleChange}
+              error={errors.lastName}
+            />
+          </div>
+          <InputField
             name="email"
-            onChange={handleChange}
-          />
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-        </div>
-
-        {/* Repeat Email */}
-        <div>
-          <input
             type="email"
-            className={inputClass('repeatEmail')}
-            placeholder="Repeat email*"
+            placeholder="Email *"
+            value={formData.email}
+            onChange={handleChange}
+            error={errors.email}
+          />
+          <InputField
             name="repeatEmail"
+            type="email"
+            placeholder="Repeat Email *"
+            value={formData.repeatEmail}
             onChange={handleChange}
+            error={errors.repeatEmail}
           />
-          {errors.repeatEmail && <p className="text-red-500 text-sm mt-1">{errors.repeatEmail}</p>}
-        </div>
-
-        {/* Password */}
-        <div>
-          <input
-            type="password"
-            className={inputClass('password')}
-            placeholder="Password*"
+          <InputField
             name="password"
-            onChange={handleChange}
-          />
-          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-        </div>
-
-        {/* Repeat Password */}
-        <div>
-          <input
             type="password"
-            className={inputClass('repeatPassword')}
-            placeholder="Repeat password*"
+            placeholder="Password *"
+            value={formData.password}
+            onChange={handleChange}
+            error={errors.password}
+          />
+          <InputField
             name="repeatPassword"
+            type="password"
+            placeholder="Repeat Password *"
+            value={formData.repeatPassword}
             onChange={handleChange}
+            error={errors.repeatPassword}
           />
-          {errors.repeatPassword && <p className="text-red-500 text-sm mt-1">{errors.repeatPassword}</p>}
-        </div>
 
-        {/* Language */}
-        <div>
-          <label className="block mb-1">Preferred language*</label>
-          <select
-            name="language"
-            value={formData.language}
-            onChange={handleChange}
-            className="w-full border-2 border-slate-100 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            <option>English</option>
-            <option>Deutsch</option>
-            <option>Español</option>
-            <option>Français</option>
-          </select>
-        </div>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">Preferred Language</label>
+            <select
+              name="language"
+              value={formData.language}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border-2 border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option>English</option>
+              <option>Deutsch</option>
+              <option>Español</option>
+              <option>Français</option>
+            </select>
+          </div>
 
-        {/* Security Answer */}
-        <div>
-          <input
-            className={inputClass('securityAnswer')}
-            placeholder="Security question: How old is the player Esteban Andrada in years?"
+          <InputField
             name="securityAnswer"
+            placeholder="How old is Esteban Andrada? (in years) *"
+            value={formData.securityAnswer}
             onChange={handleChange}
+            error={errors.securityAnswer}
           />
-          {errors.securityAnswer && <p className="text-red-500 text-sm mt-1">{errors.securityAnswer}</p>}
         </div>
 
-        {/* Accept Terms */}
-        <div className="flex items-start space-x-2">
-          <input
-            type="checkbox"
+        <div className="space-y-3">
+          <CheckboxField
             name="acceptTerms"
+            label={
+              <>
+                I accept the{" "}
+                <a href="#" className="text-blue-600 hover:underline">
+                  terms of use
+                </a>
+              </>
+            }
             checked={formData.acceptTerms}
             onChange={handleChange}
-            className={errors.acceptTerms ? 'border-red-500' : ''}
+            error={errors.acceptTerms}
+            required
           />
-          <label>
-            I accept the{' '}
-            <a href="#" className="text-blue-500 underline">
-              terms of use
-            </a>{' '}
-            *
-          </label>
-        </div>
-        {errors.acceptTerms && <p className="text-red-500 text-sm mt-1">{errors.acceptTerms}</p>}
-
-        {/* Accept Newsletter */}
-        <div className="flex items-start space-x-2">
-          <input
-            type="checkbox"
+          <CheckboxField
             name="acceptNewsletter"
+            label="I agree to receive newsletters about features and offers"
             checked={formData.acceptNewsletter}
             onChange={handleChange}
+            error={errors.acceptNewsletter}
           />
-          <label>I agree to receive newsletters about features and offers.</label>
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
-          className="bg-blue-600 text-white font-bold px-6 py-2 rounded hover:bg-blue-700"
+          className="w-full bg-gradient-to-r from-blue-950 to-blue-900 text-white font-semibold py-2 px-6 rounded-md hover:from-blue-900 hover:to-blue-800 transition-all duration-200"
+          disabled={isLoading}
         >
-          Register now
+          {isLoading ? "Registering..." : "Register Now"}
         </button>
       </form>
+
+      {/* Modal thông báo thành công */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
+            <h2 className="text-xl font-bold text-green-600 mb-4">Registration Successful!</h2>
+            <p className="text-gray-700 mb-6">Your account has been created successfully. You will be redirected to the login page.</p>
+            <button
+              onClick={closeSuccessModal}
+              className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition-all duration-200"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
