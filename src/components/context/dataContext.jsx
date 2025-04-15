@@ -1,157 +1,285 @@
-import { useState,useContext,createContext } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
+import { fetchTeams, fetchMatches, fetchShopItems, fetchLeagues, fetchScores, fetchResultsLive, fetchResults } from "../../data/apiService";
 
-const dataContext=createContext()
-export const DataProvider=({children})=>{
+const DataContext = createContext();
+
+export const DataProvider = ({ children }) => {
   const [heroData, setHeroData] = useState([]);
-  const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [leagueTableData, setLeagueTableData] = useState([]);
   const [topScorersData, setTopScorersData] = useState([]);
   const [featuredTeamsData, setFeaturedTeamsData] = useState([]);
   const [shopItems, setShopItems] = useState([]);
-  const [latestNewsData] = useState([
-    { id: 1, title: 'Transfer Deadline Day', date: '10 Sep 2024', summary: 'A frantic end...', category: 'Transfers', imageUrl: 'https://via.placeholder.com/400x250' },
-    { id: 2, title: 'Tactical Shifts', date: '12 Sep 2024', summary: 'Analysing...', category: 'Analysis', imageUrl: 'https://via.placeholder.com/400x250' }
-  ]);
-  useEffect(() => {
-    const fetchTeams = async () => {
-      const teamsResponse = await axios.get(`/api/v4/competitions/PL/teams`, {
-        headers: { 'X-Auth-Token': API_KEY }
-      });
+  const [loading, setLoading] = useState(true);
+  const [stadium, setStadium] = useState(null);
+  const [match, setMatch] = useState(null);
+  const [typeSeat, setTypeSeat] = useState(null);
+  const [seat, setSeat] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [formData, setFormData] = useState(null);
+  const [filter, setFilter] = useState("upcoming");
+  const [filteredMatches, setFilteredMatches] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [allMatches,setAllMatches]=useState([])
 
-      const teams = teamsResponse.data.teams.map(team => ({
+  
+  const [latestNewsData] = useState([
+    { id: 1, title: "Transfer Deadline Day", date: "10 Sep 2024", summary: "A frantic end...", category: "Transfers", imageUrl: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=870&auto=format&fit=crop" },
+    { id: 2, title: "Tactical Shifts", date: "12 Sep 2024", summary: "Analysing...", category: "Analysis", imageUrl: "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=870&auto=format&fit=crop" },
+  ]);
+
+  useEffect(() => {
+    const loadFeaturedTeams = async () => {
+      const teams = await fetchTeams();
+      const mappedTeams = teams.map((team) => ({
         name: team.name,
         stadium: team.venue,
         logo: team.crest,
-        description: `Home stadium: ${team.venue}`
       }));
-
-      setFeaturedTeamsData(teams.slice(0, 5)); // Lấy 5 đội đầu tiên
+      setFeaturedTeamsData(mappedTeams);
     };
-
-    fetchTeams();
-  }, []);
-  useEffect(() => {
-    const fetchShopItems = async () => {
-      try {
-        const response = await axios.get('https://fakestoreapi.com/products');
-
-        const products = response.data.slice(0, 4).map(product => ({
-          id: product.id,
-          name: product.title, // field mới
-          price: `£${product.price}`,
-          imageUrl: product.image,
-          category: product.category
-        }));
-
-        setShopItems(products);
-      } catch (error) {
-        console.error('Error fetching product data:', error);
-      }
-    };
-
-    fetchShopItems();
+    loadFeaturedTeams();
   }, []);
 
-  const [loading, setLoading] = useState(true);
-
-  const API_KEY = '47ba1a2d82874ebdb51137ca85c05bf4';
-
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
+        const teams = await fetchTeams();
+        const matches = await fetchMatches();
 
-        // Hero Section (Trận đấu nổi bật)
-        // Bước 1: Lấy danh sách đội bóng và sân vận động
-        const teamsResponse = await axios.get(`/api/v4/competitions/PL/teams`, {
-          headers: { 'X-Auth-Token': API_KEY }
-        });
         const teamVenues = {};
-        teamsResponse.data.teams.forEach(team => {
-          teamVenues[team.name] = team.venue; // Lưu sân vận động theo tên đội
+        teams.forEach((team) => {
+          teamVenues[team.name] = team.venue;
         });
 
-        // Bước 2: Lấy danh sách trận đấu sắp diễn ra
-        //test
-        const matchesResponse = await axios.get(`/api/v4/competitions/PL/matches`, {
-          headers: { 'X-Auth-Token': API_KEY },
-          params: { status: 'SCHEDULED', limit: 2 }
-        });
-
-        const heroMatches = matchesResponse.data.matches.map(match => ({
-          team1: match.homeTeam.name,
-          team2: match.awayTeam.name,
-          date: new Date(match.utcDate).toLocaleDateString(),
-          stadium: teamVenues[match.homeTeam.name] || 'TBC', // Lấy sân nhà của đội chủ nhà
-          time: new Date(match.utcDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          team1Logo: match.homeTeam.crest,
-          team2Logo: match.awayTeam.crest
-        }));
-
-        setHeroData(heroMatches);
-
-        // Upcoming Matches
-        const upcomingResponse = await axios.get(`/api/v4/competitions/PL/matches`, {
-          headers: { 'X-Auth-Token': API_KEY },
-          params: { status: 'SCHEDULED', limit: 5 }
-        });
-        const upcoming = upcomingResponse.data.matches.map(match => ({
+        const heroMatches = matches.map((match) => ({
+          id: match.id,
           team1: match.homeTeam.name.split(" FC")[0],
           team2: match.awayTeam.name.split(" FC")[0],
           date: new Date(match.utcDate).toLocaleDateString(),
-          time: new Date(match.utcDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          stadium: teamVenues[match.homeTeam.name] || 'TBC', // Lấy sân nhà của đội chủ nhà
-          logo1: match.homeTeam.crest,
-          logo2: match.awayTeam.crest
+          stadium: teamVenues[match.homeTeam.name] || "TBC",
+          time: new Date(match.utcDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          team1Logo: match.homeTeam.crest,
+          team2Logo: match.awayTeam.crest,
+          utcDate: match.utcDate,
         }));
 
-        setUpcomingMatches(upcoming);
-
-
-        // League Table
-        const standingsResponse = await axios.get(`/api/v4/competitions/PL/standings`, {
-          headers: { 'X-Auth-Token': API_KEY }
-        });
-        const standings = standingsResponse.data.standings[0].table.map(team => ({
-          position: team.position,
-          team: team.team.name,
-          played: team.playedGames,
-          points: team.points,
-          logo: team.team.crest
-        }));
-        setLeagueTableData(standings.slice(0, 5));
-
-        // Top Scorers
-        const scorersResponse = await axios.get(`/api/v4/competitions/PL/scorers `, {
-          headers: { 'X-Auth-Token': API_KEY }
-        });
-        const scorers = scorersResponse.data.scorers.map((player, index) => ({
-          rank: index + 1,
-          name: player.player.name,
-          team: player.team.name,
-          goals: player.goals,
-          logo: player.team.crest
-        }));
-        setTopScorersData(scorers.slice(0, 3));
-
-        setLoading(false);
+        setHeroData(heroMatches);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error loading data:", error);
+      } finally {
         setLoading(false);
       }
     };
+    loadData();
+  }, []);
 
-    fetchData();
-  }, [API_KEY]);
+  useEffect(() => {
+    const loadMatchesFromAPI = async () => {
+      try {
+        const live = await fetchResultsLive();
+        const results = await fetchResults();
+        const teams = await fetchTeams();
+  
+        const teamVenues = {};
+        teams.forEach((team) => {
+          teamVenues[team.name] = team.venue;
+        });
+  
+        const mappedMatches = [...live, ...results].map((match) => ({
+          id: match.id,
+          team1: match.homeTeam.name.split(" FC")[0],
+          team2: match.awayTeam.name.split(" FC")[0],
+          date: new Date(match.utcDate).toLocaleDateString(),
+          time: new Date(match.utcDate).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          stadium: teamVenues[match.homeTeam.name] || "TBC",
+          team1Logo: match.homeTeam.crest,
+          team2Logo: match.awayTeam.crest,
+          score: `${match.score.fullTime.home} - ${match.score.fullTime.away}`,
+          minute: match.minute || null,
+          utcDate: match.utcDate,
+          status: match.status,
+        }));
+  
+        setAllMatches(mappedMatches);
+      } catch (error) {
+        console.error("Error loading match data:", error);
+      }
+    };
+  
+    loadMatchesFromAPI();
+  }, []);
+  useEffect(() => {
+    const filterMatches = () => {
+      let filtered = [];
+  
+      if (filter === "results") {
+        filtered = allMatches;
+      } else if (filter === "upcoming") {
+        filtered = heroData;
+      }
+  
+      filtered = filtered.filter((match) => {
+        return (
+          searchTerm === "" ||
+          match.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          match.team2.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
+  
+      filtered.sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate));
+      setFilteredMatches(filtered);
+    };
+  
+    filterMatches();
+  }, [filter, searchTerm, allMatches, heroData]);
+    
 
-  if (loading) {
-    return <div className="text-center text-white py-20">Loading...</div>;
-  }
-  return(
-    <dataContext.Provider value={{heroData,upcomingMatches,leagueTableData,topScorersData,featuredTeamsData,shopItems,latestNewsData}}>
+  useEffect(() => {
+    const loadLeagues = async () => {
+      const standings = await fetchLeagues();
+      const mappedStandings = standings[0].table.map((league) => ({
+        position: league.position,
+        team: league.team.name.split(" FC")[0],
+        played: league.playedGames,
+        points: league.points,
+        logo: league.team.crest,
+        won: league.won,
+        draw: league.draw,
+        lost: league.lost,
+      }));
+      setLeagueTableData(mappedStandings);
+    };
+    loadLeagues();
+  }, []);
+
+  useEffect(() => {
+    const loadTopScores = async () => {
+      const scorers = await fetchScores();
+      const mappedScorers = scorers.map((player, index) => ({
+        rank: index + 1,
+        name: player.player.name,
+        team: player.team.name,
+        goals: player.goals,
+        logo: player.team.crest,
+      }));
+      setTopScorersData(mappedScorers);
+    };
+    loadTopScores();
+  }, []);
+
+  useEffect(() => {
+    const loadShopItems = async () => {
+      const products = await fetchShopItems();
+      const mappedProducts = products.slice(0, 4).map((product) => ({
+        id: product.id,
+        name: product.title,
+        price: `£${product.price}`,
+        imageUrl: product.image,
+        category: product.category,
+      }));
+      setShopItems(mappedProducts);
+    };
+    loadShopItems();
+  }, []);
+
+  const matchesPerPage = 3;
+  const indexOfLastMatch = currentPage * matchesPerPage;
+  const indexOfFirstMatch = indexOfLastMatch - matchesPerPage;
+  const currentMatches = filteredMatches.slice(indexOfFirstMatch, indexOfLastMatch);
+  const totalPages = Math.ceil(filteredMatches.length / matchesPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const renderPaginationButtons = () => {
+    const pageNumbers = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      pageNumbers.push(1);
+      if (currentPage <= 3) {
+        pageNumbers.push(2, 3, 4, "...", totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push("...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pageNumbers.push("...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+      }
+    }
+
+    return pageNumbers.map((pageNumber, index) =>
+      pageNumber === "..." ? (
+        <span key={`ellipsis-${index}`} className="w-8 h-8 flex items-center justify-center text-gray-400">
+          ...
+        </span>
+      ) : (
+        <button
+          key={pageNumber}
+          onClick={() => setCurrentPage(pageNumber)}
+          className={`w-8 h-8 flex items-center justify-center rounded-full ${
+            currentPage === pageNumber ? "bg-red-600 text-white font-medium" : "text-gray-700 hover:bg-red-100"
+          }`}
+        >
+          {pageNumber}
+        </button>
+      )
+    );
+  };
+
+  return (
+    <DataContext.Provider
+      value={{
+        heroData,
+        leagueTableData,
+        topScorersData,
+        featuredTeamsData,
+        shopItems,
+        latestNewsData,
+        loading,
+        stadium,
+        setStadium,
+        match,
+        setMatch,
+        typeSeat,
+        setTypeSeat,
+        seat,
+        setSeat,
+        quantity,
+        setQuantity,
+        formData,
+        setFormData,
+        filter,
+        setFilter,
+        filteredMatches,
+        currentPage,
+        setCurrentPage,
+        searchTerm,
+        setSearchTerm,
+        currentMatches,
+        totalPages,
+        handleNextPage,
+        handlePrevPage,
+        renderPaginationButtons,
+      }}
+    >
       {children}
-    </dataContext.Provider>
-  )
-}
+    </DataContext.Provider>
+  );
+};
 
-export const useData=()=>useContext(dataContext)
+export const useData = () => useContext(DataContext);

@@ -15,36 +15,27 @@ import Register from './pages/RegisterPage';
 import WhyRegister from './pages/WhyRegisterPage';
 import UpdateProfile from './pages/UpdateProfilePage';
 import Highlights from './pages/Highlights';
-import ShoppingCart from './pages/CartPage';
-import { CartProvider } from './context/CartContext';
+
 function App() {
   return (
-    <CartProvider>
+    <div className="min-h-screen bg-gray-900">
+      <Navbar />
+      <Routes>
+        <Route path='/home' element={<Home />}></Route>
+        <Route path='/matches' element={<MatchesPage />}></Route>
+        <Route path='/matches/:id' element={<MatchDetailPage />}></Route>
+        <Route path='/news' element={<NewsPage />}></Route>
+        <Route path='/shop' element={<ShopPage></ShopPage>}></Route>
+        <Route path='/shop/:id' element={<ProductDetailPage />}></Route>
+        <Route path='/contact' element={<ContactPage></ContactPage>}></Route>
+        <Route path='/highlight' element={<Highlights></Highlights>}></Route>
+      </Routes>
+      <Footer />
 
-      <div className="min-h-screen bg-gray-900">
-        <Navbar />
-        <Routes>
-          <Route path='/home' element={<Home />}></Route>
-          <Route path='/matches' element={<MatchesPage />}></Route>
-          <Route path='/matches/:id' element={<MatchDetailPage />}></Route>
-          <Route path='/news' element={<NewsPage />}></Route>
-          <Route path='/shop' element={<ShopPage></ShopPage>}></Route>
-          <Route path='/shop/:id' element={<ProductDetailPage />}></Route>
-          <Route path='/contact' element={<ContactPage></ContactPage>}></Route>
-          <Route path='/forgot-username' element={<ForgotUsername />}></Route>
-          <Route path='/forgot-password' element={<ForgotPassword />}></Route>
-          <Route path='/register' element={<Register />}></Route>
-          <Route path='/why-register' element={<WhyRegister />}></Route>
-          <Route path='/highlight' element={<Highlights></Highlights>}></Route>
-          <Route path="/update-profile" element={<UpdateProfile />} />
-          <Route path="/shopping-cart" element={<ShoppingCart />} />
-        </Routes>
-        <Footer />
+      {/* <Home></Home> */}
+      {/* <NewsPage></NewsPage> */}
 
-        {/* <Home></Home> */}
-        {/* <NewsPage></NewsPage> */}
-
-        {/* <Hero />
+      {/* <Hero />
       <LatestResults />
       <Standings />
       <ShopSection /> */}

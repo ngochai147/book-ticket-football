@@ -1,0 +1,635 @@
+[
+  {
+    "name": "Anfield",
+    "capacity": 54074,
+    "availableTickets": 1200,
+    "address": "Anfield Road, Liverpool, L4 0TH",
+    "ticketPrices": {
+      "standard": {
+        "north": 25,
+        "south": 28,
+        "east": 30,
+        "west": 32,
+        "availableTickets": 800,
+        "totalTickets": 32444
+      },
+      "premium": {
+        "north": 45,
+        "south": 50,
+        "east": 55,
+        "west": 60,
+        "availableTickets": 300,
+        "totalTickets": 10815
+      },
+      "vip": {
+        "north": 90,
+        "south": 95,
+        "east": 100,
+        "west": 105,
+        "availableTickets": 100,
+        "totalTickets": 5415
+      }
+    }
+  },
+  {
+    "name": "Craven Cottage",
+    "capacity": 25700,
+    "availableTickets": 900,
+    "address": "Stevenage Road, London, SW6 6HH",
+    "ticketPrices": {
+      "standard": {
+        "north": 20,
+        "south": 23,
+        "east": 25,
+        "availableTickets": 600,
+        "totalTickets": 15420
+      },
+      "premium": {
+        "north": 40,
+        "south": 45,
+        "east": 47,
+        "west": 50,
+        "availableTickets": 200,
+        "totalTickets": 5140
+      },
+      "vip": {
+        "north": 85,
+        "south": 90,
+        "east": 92,
+        "west": 95,
+        "availableTickets": 100,
+        "totalTickets": 2570
+      }
+    }
+  },
+  {
+    "name": "Emirates Stadium",
+    "capacity": 60704,
+    "availableTickets": 1500,
+    "address": "Hornsey Road, London, N7 7AJ",
+    "ticketPrices": {
+      "standard": {
+        "north": 30,
+        "south": 33,
+        "east": 36,
+        "west": 38,
+        "availableTickets": 1000,
+        "totalTickets": 36422
+      },
+      "premium": {
+        "north": 55,
+        "south": 60,
+        "east": 65,
+        "west": 70,
+        "availableTickets": 400,
+        "totalTickets": 12141
+      },
+      "vip": {
+        "north": 110,
+        "south": 115,
+        "east": 120,
+        "west": 125,
+        "availableTickets": 100,
+        "totalTickets": 6070
+      }
+    }
+  },
+  {
+    "name": "Etihad Stadium",
+    "capacity": 53400,
+    "availableTickets": 1800,
+    "address": "Etihad Campus, Manchester, M11 3FF",
+    "ticketPrices": {
+      "standard": {
+        "north": 35,
+        "south": 38,
+        "east": 40,
+        "availableTickets": 1200,
+        "totalTickets": 32040
+      },
+      "premium": {
+        "north": 65,
+        "south": 70,
+        "east": 75,
+        "west": 80,
+        "availableTickets": 400,
+        "totalTickets": 10680
+      },
+      "vip": {
+        "north": 140,
+        "south": 145,
+        "east": 150,
+        "west": 155,
+        "availableTickets": 200,
+        "totalTickets": 5340
+      }
+    }
+  },
+  {
+    "name": "Goodison Park",
+    "capacity": 39414,
+    "availableTickets": 700,
+    "address": "Goodison Road, Liverpool, L4 4EL",
+    "ticketPrices": {
+      "standard": {
+        "north": 18,
+        "south": 20,
+        "east": 22,
+        "availableTickets": 500,
+        "totalTickets": 23648
+      },
+      "premium": {
+        "north": 38,
+        "south": 42,
+        "east": 45,
+        "west": 48,
+        "availableTickets": 150,
+        "totalTickets": 7883
+      },
+      "vip": {
+        "north": 80,
+        "south": 85,
+        "east": 90,
+        "west": 95,
+        "availableTickets": 50,
+        "totalTickets": 3941
+      }
+    }
+  },
+  {
+    "name": "Griffin Park",
+    "capacity": 12763,
+    "availableTickets": 250,
+    "address": "Braemar Road, Brentford, TW8 0NT",
+    "ticketPrices": {
+      "standard": {
+        "north": 15,
+        "south": 17,
+        "east": 18,
+        "west": 20,
+        "availableTickets": 150,
+        "totalTickets": 7658
+      },
+      "premium": {
+        "north": 33,
+        "south": 35,
+        "east": 40,
+        "availableTickets": 70,
+        "totalTickets": 2553
+      },
+      "vip": {
+        "north": 70,
+        "south": 75,
+        "east": 80,
+        "west": 85,
+        "availableTickets": 30,
+        "totalTickets": 1276
+      }
+    }
+  },
+  {
+    "name": "King Power Stadium",
+    "capacity": 32312,
+    "availableTickets": 1000,
+    "address": "Filbert Way, Leicester, LE2 7FL",
+    "ticketPrices": {
+      "standard": {
+        "north": 25,
+        "south": 27,
+        "east": 30,
+        "west": 32,
+        "availableTickets": 700,
+        "totalTickets": 19387
+      },
+      "premium": {
+        "north": 47,
+        "south": 50,
+        "east": 55,
+        "west": 58,
+        "availableTickets": 200,
+        "totalTickets": 6462
+      },
+      "vip": {
+        "north": 105,
+        "south": 110,
+        "east": 115,
+        "west": 120,
+        "availableTickets": 100,
+        "totalTickets": 3231
+      }
+    }
+  },
+  {
+    "name": "London Stadium",
+    "capacity": 62850,
+    "availableTickets": 2000,
+    "address": "Queen Elizabeth Olympic Park, London, E20 2ST",
+    "ticketPrices": {
+      "standard": {
+        "north": 28,
+        "south": 30,
+        "east": 32,
+        "west": 35,
+        "availableTickets": 1400,
+        "totalTickets": 37710
+      },
+      "premium": {
+        "north": 50,
+        "south": 55,
+        "east": 60,
+        "west": 65,
+        "availableTickets": 400,
+        "totalTickets": 12570
+      },
+      "vip": {
+        "north": 120,
+        "south": 125,
+        "east": 130,
+        "west": 135,
+        "availableTickets": 200,
+        "totalTickets": 6285
+      }
+    }
+  },
+  {
+    "name": "Molineux Stadium",
+    "capacity": 31750,
+    "availableTickets": 850,
+    "address": "Waterloo Road, Wolverhampton, WV1 4QR",
+    "ticketPrices": {
+      "standard": {
+        "north": 20,
+        "south": 23,
+        "east": 25,
+        "west": 27,
+        "availableTickets": 600,
+        "totalTickets": 19050
+      },
+      "premium": {
+        "north": 43,
+        "south": 47,
+        "east": 50,
+        "west": 52,
+        "availableTickets": 150,
+        "totalTickets": 6350
+      },
+      "vip": {
+        "north": 90,
+        "south": 95,
+        "east": 100,
+        "west": 105,
+        "availableTickets": 100,
+        "totalTickets": 3175
+      }
+    }
+  },
+  {
+    "name": "Old Trafford",
+    "capacity": 74310,
+    "availableTickets": 2200,
+    "address": "Old Trafford, Manchester, M16 0RA",
+    "ticketPrices": {
+      "standard": {
+        "north": 45,
+        "south": 48,
+        "east": 50,
+        "availableTickets": 1500,
+        "totalTickets": 44586
+      },
+      "premium": {
+        "north": 75,
+        "south": 80,
+        "east": 85,
+        "west": 90,
+        "availableTickets": 500,
+        "totalTickets": 14862
+      },
+      "vip": {
+        "north": 160,
+        "south": 165,
+        "east": 170,
+        "west": 175,
+        "availableTickets": 200,
+        "totalTickets": 7431
+      }
+    }
+  },
+  {
+    "name": "Portman Road Stadium",
+    "capacity": 30311,
+    "availableTickets": 700,
+    "address": "Portman Road, Ipswich, IP1 2DA",
+    "ticketPrices": {
+      "standard": {
+        "north": 22,
+        "south": 24,
+        "east": 26,
+        "west": 28,
+        "availableTickets": 500,
+        "totalTickets": 18187
+      },
+      "premium": {
+        "north": 40,
+        "south": 45,
+        "east": 48,
+        "west": 50,
+        "availableTickets": 150,
+        "totalTickets": 6062
+      },
+      "vip": {
+        "north": 85,
+        "south": 90,
+        "east": 95,
+        "west": 100,
+        "availableTickets": 50,
+        "totalTickets": 3031
+      }
+    }
+  },
+  {
+    "name": "Selhurst Park",
+    "capacity": 25486,
+    "availableTickets": 600,
+    "address": "Selhurst Park Road, London, SE25 6PU",
+    "ticketPrices": {
+      "standard": {
+        "north": 18,
+        "south": 20,
+        "east": 22,
+        "availableTickets": 400,
+        "totalTickets": 15292
+      },
+      "premium": {
+        "north": 38,
+        "south": 40,
+        "east": 43,
+        "west": 45,
+        "availableTickets": 150,
+        "totalTickets": 5097
+      },
+      "vip": {
+        "north": 80,
+        "south": 85,
+        "east": 90,
+        "west": 95,
+        "availableTickets": 50,
+        "totalTickets": 2549
+      }
+    }
+  },
+  {
+    "name": "St. James' Park",
+    "capacity": 52305,
+    "availableTickets": 1800,
+    "address": "Strawberry Place, Newcastle upon Tyne, NE1 4ST",
+    "ticketPrices": {
+      "standard": {
+        "north": 28,
+        "south": 30,
+        "east": 32,
+        "west": 35,
+        "availableTickets": 1200,
+        "totalTickets": 31383
+      },
+      "premium": {
+        "north": 50,
+        "south": 55,
+        "east": 60,
+        "west": 63,
+        "availableTickets": 400,
+        "totalTickets": 10461
+      },
+      "vip": {
+        "north": 115,
+        "south": 120,
+        "east": 125,
+        "west": 130,
+        "availableTickets": 200,
+        "totalTickets": 5230
+      }
+    }
+  },
+  {
+    "name": "St Mary's Stadium",
+    "capacity": 32384,
+    "availableTickets": 950,
+    "address": "Britannia Road, Southampton, SO14 5FP",
+    "ticketPrices": {
+      "standard": {
+        "north": 26,
+        "south": 28,
+        "east": 30,
+        "west": 32,
+        "availableTickets": 650,
+        "totalTickets": 19430
+      },
+      "premium": {
+        "north": 48,
+        "south": 50,
+        "east": 53,
+        "west": 55,
+        "availableTickets": 200,
+        "totalTickets": 6477
+      },
+      "vip": {
+        "north": 98,
+        "south": 102,
+        "east": 105,
+        "west": 110,
+        "availableTickets": 100,
+        "totalTickets": 3238
+      }
+    }
+  },
+  {
+    "name": "Stamford Bridge",
+    "capacity": 40341,
+    "availableTickets": 1300,
+    "address": "Stamford Bridge, London, SW6 1HS",
+    "ticketPrices": {
+      "standard": {
+        "north": 38,
+        "south": 40,
+        "east": 42,
+        "availableTickets": 900,
+        "totalTickets": 24205
+      },
+      "premium": {
+        "north": 68,
+        "south": 70,
+        "east": 72,
+        "west": 75,
+        "availableTickets": 300,
+        "totalTickets": 8068
+      },
+      "vip": {
+        "north": 150,
+        "south": 155,
+        "east": 160,
+        "west": 165,
+        "availableTickets": 100,
+        "totalTickets": 4034
+      }
+    }
+  },
+  {
+    "name": "The American Express Community Stadium",
+    "capacity": 31800,
+    "availableTickets": 750,
+    "address": "Village Way, Brighton, BN1 9BL",
+    "ticketPrices": {
+      "standard": {
+        "north": 22,
+        "south": 24,
+        "east": 26,
+        "west": 28,
+        "availableTickets": 500,
+        "totalTickets": 19080
+      },
+      "premium": {
+        "north": 42,
+        "south": 45,
+        "east": 48,
+        "west": 50,
+        "availableTickets": 150,
+        "totalTickets": 6360
+      },
+      "vip": {
+        "north": 85,
+        "south": 90,
+        "east": 95,
+        "west": 100,
+        "availableTickets": 100,
+        "totalTickets": 3180
+      }
+    }
+  },
+  {
+    "name": "Tottenham Hotspur Stadium",
+    "capacity": 62850,
+    "availableTickets": 1750,
+    "address": "782 High Rd, London, N17 0BX",
+    "ticketPrices": {
+      "standard": {
+        "north": 40,
+        "south": 42,
+        "east": 45,
+        "west": 48,
+        "availableTickets": 1200,
+        "totalTickets": 37710
+      },
+      "premium": {
+        "north": 70,
+        "south": 75,
+        "east": 80,
+        "west": 85,
+        "availableTickets": 400,
+        "totalTickets": 12570
+      },
+      "vip": {
+        "north": 145,
+        "south": 150,
+        "east": 155,
+        "west": 160,
+        "availableTickets": 150,
+        "totalTickets": 6285
+      }
+    }
+  },
+  {
+    "name": "The City Ground",
+    "capacity": 30445,
+    "availableTickets": 850,
+    "address": "Pavilion Road, Nottingham, NG2 5FJ",
+    "ticketPrices": {
+      "standard": {
+        "north": 24,
+        "south": 26,
+        "east": 28,
+        "west": 30,
+        "availableTickets": 600,
+        "totalTickets": 18267
+      },
+      "premium": {
+        "north": 45,
+        "south": 48,
+        "east": 50,
+        "west": 53,
+        "availableTickets": 150,
+        "totalTickets": 6089
+      },
+      "vip": {
+        "north": 95,
+        "south": 100,
+        "east": 105,
+        "west": 110,
+        "availableTickets": 100,
+        "totalTickets": 3045
+      }
+    }
+  },
+  {
+    "name": "Villa Park",
+    "capacity": 42785,
+    "availableTickets": 1100,
+    "address": "Trinity Road, Birmingham, B6 6HE",
+    "ticketPrices": {
+      "standard": {
+        "north": 27,
+        "south": 30,
+        "east": 32,
+        "west": 35,
+        "availableTickets": 700,
+        "totalTickets": 25671
+      },
+      "premium": {
+        "north": 50,
+        "south": 55,
+        "east": 58,
+        "west": 60,
+        "availableTickets": 300,
+        "totalTickets": 8557
+      },
+      "vip": {
+        "north": 100,
+        "south": 105,
+        "east": 110,
+        "west": 115,
+        "availableTickets": 100,
+        "totalTickets": 4278
+      }
+    }
+  },
+  {
+    "name": "Vitality Stadium",
+    "capacity": 11364,
+    "availableTickets": 300,
+    "address": "Dean Court, Kings Park, Bournemouth, BH7 7AF",
+    "ticketPrices": {
+      "standard": {
+        "north": 18,
+        "south": 20,
+        "east": 22,
+        "west": 24,
+        "availableTickets": 200,
+        "totalTickets": 6818
+      },
+      "premium": {
+        "north": 35,
+        "south": 38,
+        "east": 40,
+        "west": 42,
+        "availableTickets": 70,
+        "totalTickets": 2273
+      },
+      "vip": {
+        "north": 75,
+        "south": 80,
+        "east": 85,
+        "west": 90,
+        "availableTickets": 30,
+        "totalTickets": 1136
+      }
+    }
+  }
+]
