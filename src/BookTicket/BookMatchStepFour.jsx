@@ -1,7 +1,7 @@
 import React from "react";
 import { Check, Home, Printer, Ticket, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useData } from "../context/DataContext";
+import { useData } from "../context/dataContext";
 
 const BookMatchStepFour = () => {
     const { match, typeSeat, seat, stadium, quantity, formData, resetBookingData } = useData();

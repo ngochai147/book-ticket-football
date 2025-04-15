@@ -1,11 +1,17 @@
 import React from 'react';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaPaperPlane } from 'react-icons/fa';
-
+import { useNavigate } from 'react-router-dom';
 function ContactPage() {
+  const navigate = useNavigate();
+
+  const hanleSubmit = (e)=>{
+    e.preventDefault();
+    navigate("/home");
+  }
   return (
     <div className="bg-white py-16">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
+        <div className="text-center mb-14"> 
           <FaEnvelope className="text-6xl text-red-600 mx-auto mb-4" />
           <h1 className="text-5xl font-bold text-gray-800 tracking-tight">
             Get In Touch
@@ -17,7 +23,7 @@ function ContactPage() {
         <div className="grid grid-cols-2 gap-16">
           <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-200">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Send Us a Message</h2>
-            <form className="space-y-5">
+            <form className="space-y-5" onSubmit={hanleSubmit} method='GET'>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Your Name <span className="text-red-500">*</span>
@@ -73,6 +79,7 @@ function ContactPage() {
                 <button
                   type="submit"
                   className={"w-full flex justify-center items-center gap-2 px-6 py-3 border rounded-md font-medium text-white  bg-red-600 hover:bg-red-700"}> 
+                  
                       <FaPaperPlane className="mr-2" /> Send Message
                 </button>
               </div>

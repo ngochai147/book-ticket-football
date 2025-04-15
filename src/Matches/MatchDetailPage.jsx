@@ -3,7 +3,7 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import { useData } from "../context/DataContext";
 import { FaCalendarAlt, FaClock, FaLocationArrow, FaArrowLeft } from "react-icons/fa";
 import { Ticket } from "lucide-react";
-import { fetchResults, fetchResultsLive } from "../../data/apiService";
+import { fetchResults, fetchResultsLive } from "../data/apiService";
 
 function MatchDetailPage() {
   const { id } = useParams();

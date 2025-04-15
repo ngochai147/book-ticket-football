@@ -1,8 +1,8 @@
 import React from "react";
 import { FaFutbol, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import MatchListItem from "../components/Matches/MatchListItem";
-import MatchListItemWithScore from "../components/Matches/MatchListItemScore";
-import { useData } from "../components/context/DataContext";
+import MatchListItem from "../Matches/MatchListItem";
+import MatchListItemWithScore from "../Matches/MatchListItemScore";
+import { useData } from "../context/DataContext";
 
 function MatchesPage() {
   const {
