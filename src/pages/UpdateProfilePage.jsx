@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { FaUser, FaEnvelope, FaLock, FaGlobe, FaCamera, FaSave, FaTimes } from 'react-icons/fa';
 import avatarImg from '../image/avatar-fb-mac-dinh-51nSxugr.jpg';
-
+import { useNavigate } from 'react-router-dom';
 function UpdateProfile() {
+
+  // initial useNavigate 
+  const navigate = useNavigate(); 
   // Initial state with user data
   const [formData, setFormData] = useState({
     nickname: '',
@@ -121,10 +124,12 @@ function UpdateProfile() {
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = (e) => {
+    e.preventDefault();
     setFormData({...originalData});
     setErrors({});
     setChangePassword(false);
+   // navigate("/home");
   };
 
   const handleAvatarChange = () => {

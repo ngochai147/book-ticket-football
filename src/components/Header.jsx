@@ -28,7 +28,7 @@ function Navbar() {
     { name: "Matches", href: "/matches" },
     { name: "News", href: "/news" },
     { name: "Shop", href: "/shop" },
-    { name: "History", href: "#" },
+    { name: "Highlights", href: "/highlight" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -189,7 +189,7 @@ function Navbar() {
                 </div>
               )}
 
-              <div className="relative settings-dropdown-container">
+              {/* <div className="relative settings-dropdown-container">
                 <button
                   onClick={() => setShowSettings(!showSettings)}
                   className="text-white hover:text-red-500 text-2xl"
@@ -245,7 +245,7 @@ function Navbar() {
                     </div>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               <div className="md:hidden">
                 <FaBars

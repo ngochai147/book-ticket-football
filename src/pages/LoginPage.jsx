@@ -1,7 +1,8 @@
-import React from 'react';
-import { useRef, useState } from 'react';
+// src/components/LoginModal.jsx
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaTicketAlt, FaFutbol, FaTimes, FaAngleRight } from 'react-icons/fa';
+import { loginUser } from '../services/api'; // Import the loginUser API function
 
 function LoginModal({ onClose, onLoginSuccess }) {
     const usernameRef = useRef();
@@ -13,31 +14,32 @@ function LoginModal({ onClose, onLoginSuccess }) {
         e.preventDefault();
         navigate('/why-register');
         onClose();
-    }
+    };
     
     const handleRegister = (e) => {
         e.preventDefault();
         navigate('/register');
         onClose();
-    }
+    };
     
     const handleForgotPassword = (e) => {
         e.preventDefault();
         navigate('/forgot-password');
         onClose();
-    }
+    };
     
     const handleForgotUsername = (e) => {
         e.preventDefault();
         navigate('/forgot-username');
         onClose();
-    }
+    };
     
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         const username = usernameRef.current.value;
         const password = passwordRef.current.value;
 
+        // Client-side validation
         if (!username) {
             setError("Username is required");
             usernameRef.current.focus();
@@ -48,22 +50,28 @@ function LoginModal({ onClose, onLoginSuccess }) {
             passwordRef.current.focus();
             return;
         }
-        
-        // Here you would normally validate the credentials against a backend
-        // For now, we'll simulate a successful login with any non-empty credentials
-        
-        // Call the onLoginSuccess prop with user data
-        onLoginSuccess({ 
-            username: username,
-            // You could include other user data here in a real application
-            // avatar: userAvatarUrl,
-            // userId: userId
-        });
-        
-        setError("");
-        // No need to clear fields as the modal will close and unmount
-        onClose();
-    }
+
+        try {
+            // Make API call to login
+            const response = await loginUser({ nickname: username, password });
+
+            // Store the JWT token in localStorage
+            localStorage.setItem('token', response.data.token);
+
+            // Call the onLoginSuccess prop with user data
+            onLoginSuccess({
+                username: response.data.user.nickname,
+                id: response.data.user.id,
+                email: response.data.user.email,
+            });
+
+            setError("");
+            onClose();
+        } catch (error) {
+            // Handle errors from the API
+            setError(error.response?.data?.message || "An error occurred during login");
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">

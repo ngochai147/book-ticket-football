@@ -1,68 +1,58 @@
+// src/components/ShoppingCart.jsx
 import React, { useState } from 'react';
 import { FaTrash, FaShoppingCart, FaPlus, FaMinus } from 'react-icons/fa';
-
-// Dữ liệu mẫu cho giỏ hàng (có thể thay thế bằng dữ liệu từ API hoặc props)
-const initialCartItems = [
-  {
-    id: 1,
-    name: 'Áo thun nam cổ tròn',
-    price: 150000, // Giá tính bằng VND
-    quantity: 2,
-    image: 'https://via.placeholder.com/100', // Hình ảnh placeholder
-  },
-  {
-    id: 2,
-    name: 'Quần jeans slim fit',
-    price: 350000,
-    quantity: 1,
-    image: 'https://via.placeholder.com/100',
-  },
-  {
-    id: 3,
-    name: 'Áo khoác hoodie unisex',
-    price: 450000,
-    quantity: 1,
-    image: 'https://via.placeholder.com/100',
-  },
-];
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useCart } from '../context/CartContext';
+import CheckoutModal from './CheckoutModal';
+import ConfirmPaymentModal from './ConfirmPaymentModal';
+import { createOrder } from '../services/api'; // Import the new API function
 
 function ShoppingCart() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const { cart, totalPrice, increaseQuantity, removeFromCart, deleteItem, setCart } = useCart();
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-  // Hàm tăng số lượng sản phẩm
-  const increaseQuantity = (id) => {
-    setCartItems(
-      cartItems.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+  const openConfirmModal = () => {
+    setIsConfirmModalOpen(true);
   };
 
-  // Hàm giảm số lượng sản phẩm
-  const decreaseQuantity = (id) => {
-    setCartItems(
-      cartItems.map((item) =>
-        item.id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
+  const closeConfirmModal = () => {
+    setIsConfirmModalOpen(false);
   };
 
-  // Hàm xóa sản phẩm khỏi giỏ hàng
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
+  const openCheckoutModal = () => {
+    setIsConfirmModalOpen(false);
+    setIsCheckoutModalOpen(true);
   };
 
-  // Tính tổng tiền
-  const calculateTotal = () => {
-    return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+  const closeCheckoutModal = () => {
+    setIsCheckoutModalOpen(false);
   };
 
-  // Định dạng tiền tệ VND
+  const handleConfirmCheckout = async (customerInfo) => {
+    try {
+      // Prepare the order data
+      const orderData = {
+        customerInfo,
+        cartItems: cart,
+        paymentMethod: customerInfo.paymentMethod,
+      };
+
+      // Send the order data to the backend
+      const response = await createOrder(orderData);
+      console.log('Order created:', response.data);
+
+      // Show success message and reset cart
+      toast.success('Đặt hàng thành công!');
+      setCart([]); // Reset giỏ hàng
+      closeCheckoutModal();
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast.error('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.');
+    }
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -73,10 +63,12 @@ function ShoppingCart() {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-hidden">
-        {/* Header */}
         <div
-          style={{ background: 'linear-gradient(to right, #1C2526, #1C2526)' }}
-          className="text-white p-6"
+          style={{
+            background: 'linear-gradient(to right, #EE4D2D, #FF6633)',
+            color: 'white',
+            padding: '1.5rem',
+          }}
         >
           <h1 className="text-2xl font-bold flex items-center">
             <FaShoppingCart className="mr-2" /> Giỏ Hàng Của Bạn
@@ -85,58 +77,46 @@ function ShoppingCart() {
             Xem lại các sản phẩm bạn đã chọn trước khi thanh toán
           </p>
         </div>
-
-        {/* Nội dung giỏ hàng */}
         <div className="p-6 space-y-6">
-          {cartItems.length === 0 ? (
+          {cart.length === 0 ? (
             <div className="text-center text-gray-600">
               <p>Giỏ hàng của bạn đang trống!</p>
               <a
                 href="/shop"
-                className="text-[#1C2526] underline hover:text-[#1C2526] font-medium"
+                style={{ color: '#EE4D2D', textDecoration: 'underline' }}
+                onMouseEnter={(e) => (e.target.style.color = '#D94429')}
+                onMouseLeave={(e) => (e.target.style.color = '#EE4D2D')}
               >
                 Tiếp tục mua sắm
               </a>
             </div>
           ) : (
             <>
-              {/* Danh sách sản phẩm */}
               <div className="space-y-4">
-                {cartItems.map((item) => (
+                {cart.map((item) => (
                   <div
                     key={item.id}
                     className="flex flex-col md:flex-row items-center border-b border-gray-200 py-4"
                   >
-                    {/* Hình ảnh sản phẩm */}
                     <img
                       src={item.image}
                       alt={item.name}
                       className="w-24 h-24 object-cover rounded-lg mr-4"
                     />
-
-                    {/* Thông tin sản phẩm */}
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {item.name}
-                      </h3>
-                      <p className="text-gray-600">
-                        Đơn giá: {formatCurrency(item.price)}
-                      </p>
+                      <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
+                      <p className="text-gray-600">Đơn giá: {formatCurrency(item.price)}</p>
                       <p className="text-gray-600">
                         Thành tiền: {formatCurrency(item.price * item.quantity)}
                       </p>
-
-                      {/* Điều chỉnh số lượng */}
                       <div className="flex items-center mt-2">
                         <button
-                          onClick={() => decreaseQuantity(item.id)}
+                          onClick={() => removeFromCart(item.id)}
                           className="p-1 border border-gray-300 rounded-full hover:bg-gray-100"
                         >
                           <FaMinus className="text-gray-600" />
                         </button>
-                        <span className="mx-3 text-gray-800">
-                          {item.quantity}
-                        </span>
+                        <span className="mx-3 text-gray-800">{item.quantity}</span>
                         <button
                           onClick={() => increaseQuantity(item.id)}
                           className="p-1 border border-gray-300 rounded-full hover:bg-gray-100"
@@ -145,10 +125,8 @@ function ShoppingCart() {
                         </button>
                       </div>
                     </div>
-
-                    {/* Nút xóa */}
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => deleteItem(item.id)}
                       className="text-red-500 hover:text-red-700 mt-2 md:mt-0 md:ml-4"
                     >
                       <FaTrash />
@@ -156,18 +134,11 @@ function ShoppingCart() {
                   </div>
                 ))}
               </div>
-
-              {/* Tổng tiền và nút thanh toán */}
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Tổng cộng:
-                  </h3>
-                  <p className="text-xl font-bold text-gray-800">
-                    {formatCurrency(calculateTotal())}
-                  </p>
+                  <h3 className="text-lg font-semibold text-gray-800">Tổng cộng:</h3>
+                  <p className="text-xl font-bold text-gray-800">{formatCurrency(totalPrice)}</p>
                 </div>
-
                 <div className="flex justify-end space-x-4">
                   <a
                     href="/shop"
@@ -176,8 +147,16 @@ function ShoppingCart() {
                     Tiếp tục mua sắm
                   </a>
                   <button
-                    style={{ backgroundColor: '#1C2526' }}
-                    className="px-6 py-2 text-white font-medium rounded-lg hover:bg-[#1C2526] transition flex items-center"
+                    onClick={openConfirmModal}
+                    style={{
+                      backgroundColor: '#EE4D2D',
+                      color: 'white',
+                      padding: '0.5rem 1.5rem',
+                      borderRadius: '0.5rem',
+                    }}
+                    onMouseEnter={(e) => (e.target.style.backgroundColor = '#D94429')}
+                    onMouseLeave={(e) => (e.target.style.backgroundColor = '#EE4D2D')}
+                    className="transition flex items-center"
                   >
                     Thanh Toán
                   </button>
@@ -186,6 +165,19 @@ function ShoppingCart() {
             </>
           )}
         </div>
+        <ConfirmPaymentModal
+          isOpen={isConfirmModalOpen}
+          onClose={closeConfirmModal}
+          onConfirm={openCheckoutModal}
+        />
+        <CheckoutModal
+          isOpen={isCheckoutModalOpen}
+          onClose={closeCheckoutModal}
+          onConfirm={handleConfirmCheckout}
+          cartItems={cart}
+          formatCurrency={formatCurrency}
+        />
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </div>
   );
