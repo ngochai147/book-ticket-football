@@ -1,31 +1,32 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import Navbar from './components/Header';
 import Footer from './components/Footer';
+import Navbar from './components/Header';
+import ProductDetailPage from './components/Shop/ProductDetailPage';
+import MatchDetailPage from './Matches/MatchDetailPage';
+import NewsDetail from './news/NewsDetail';
+import ShoppingCart from './pages/CartPage';
+import ContactPage from './pages/ContactPage';
+import ForgotPassword from './pages/ForgotPasswordPage';
+import ForgotUsername from './pages/ForgotUsernamePage';
+import Highlights from './pages/Highlights';
 import Home from './pages/Home';
 import MatchesPage from './pages/MatchesPage';
 import NewsPage from './pages/NewsPage';
-import ContactPage from './pages/ContactPage';
-import ShopPage from './pages/ShopPage';
-import ProductDetailPage from './components/Shop/ProductDetailPage';
-import MatchDetailPage from './Matches/MatchDetailPage';
-import ForgotUsername from './pages/ForgotUsernamePage';
-import ForgotPassword from './pages/ForgotPasswordPage';
 import Register from './pages/RegisterPage';
-import WhyRegister from './pages/WhyRegisterPage';
+import ShopPage from './pages/ShopPage';
 import UpdateProfile from './pages/UpdateProfilePage';
-import Highlights from './pages/Highlights';
-import ShoppingCart from './pages/CartPage';
+import WhyRegister from './pages/WhyRegisterPage';
 
 import { CartProvider } from './context/CartContext';
 import { DataProvider } from './context/DataContext'; // Bạn nhớ import nếu có context này
 
 // Các bước booking
-import BookMatchStepOne from './BookTicket/BookMatchStepOne';
-import BookMatchStepTwo from './BookTicket/BookMatchStepTwo';
-import BookMatchStepThree from './BookTicket/BookMatchStepThree';
 import BookMatchStepFour from './BookTicket/BookMatchStepFour';
+import BookMatchStepOne from './BookTicket/BookMatchStepOne';
+import BookMatchStepThree from './BookTicket/BookMatchStepThree';
+import BookMatchStepTwo from './BookTicket/BookMatchStepTwo';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
             <Route path='/bookThree' element={<BookMatchStepThree />} />
             <Route path='/bookFour' element={<BookMatchStepFour />} />
             <Route path='/news' element={<NewsPage />} />
+            <Route path="/news/:slug" element={<NewsDetail />} />
             <Route path='/shop' element={<ShopPage />} />
             <Route path='/shop/:id' element={<ProductDetailPage />} />
             <Route path='/contact' element={<ContactPage />} />
