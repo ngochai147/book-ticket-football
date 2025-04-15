@@ -1,85 +1,93 @@
 import React from 'react';
+import { Calendar, Clock, MapPin, Info, Trophy, Star, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Ticket, Info, Trophy, Star } from 'lucide-react';
 
-function MatchListItem({ match }) {
-  const getStatusStyles = (status) => {
+function MatchListItemWithScore({ match}) {
+  const getStatusColor = (status) => {
     switch (status) {
-      case 'live':
-        return 'bg-gradient-to-r from-red-500 to-red-600 text-white';
-      case 'completed':
-        return 'bg-gradient-to-r from-gray-600 to-gray-700 text-white';
-      default:
-        return 'bg-gradient-to-r from-green-500 to-green-600 text-white';
+      case 'LIVE':
+        return 'bg-red-600';
+      case 'FINISHED':
+        return 'bg-gray-600';
     }
   };
 
   return (
     <div className="relative">
-      <div className="gray-300 rounded-3xl transform translate-y-2 scale-[0.98]"></div>
-      <div className=" rounded-3xl border border-gray-100 shadow-sm">
+      <div className="rounded-3xl border border-gray-100 shadow-sm bg-white">
         <div>
           <div className="pt-6 px-8 flex justify-between items-start">
             <div className="flex items-center gap-2 bg-red-600 text-white px-4 py-1.5 rounded-full">
               <Trophy size={16} />
+              <span className="text-sm font-medium">{match.competition}</span>
             </div>
 
-
-            <div className="px-4 py-1.5 rounded-full bg-green-600 text-white">
+            <div className={`px-4 py-1.5 rounded-full ${getStatusColor(match.status)} text-white`}>
               <span className="font-semibold">
-                Scheduled
+                {match.status === 'LIVE' &&'Live'}
+                {match.status === 'FINISHED'&&'Completed'}
               </span>
-
             </div>
           </div>
+
           <div className="mt-8 px-8">
             <div className="flex items-center">
               <div className="flex-1">
                 <div className="flex flex-col items-center gap-4">
-                  <div className=" w-24 h-24 rounded-2xl bg-white p-4 shadow-md transform transition-all duration-300 group-hover/team:scale-105 group-hover/team:shadow-lg">
+                  <div className="w-24 h-24 rounded-2xl bg-white p-4 shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                     <img
                       src={match.team1Logo}
                       className="w-full h-full object-contain"
                     />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-800">
-                      {match.team1}
-                    </h3>
+                    <h3 className="text-xl font-bold text-gray-800">{match.team1}</h3>
                     <div className="flex items-center justify-center gap-1 mt-1">
                       <Star size={14} className="text-amber-400 fill-amber-400" />
-                      <span className="text-sm text-gray-500">Home Team</span>
+                      <span className="text-sm text-gray-500">Home</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col items-center px-6">
-                <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
-                  <span className="text-xl font-bold text-white">VS</span>
-                </div>
+                {match.status === 'LIVE' || match.status === 'FINISHED' ? (
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl font-bold text-gray-800">{match.score}</div>
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+                    <span className="text-xl font-bold text-white">VS</span>
+                  </div>
+                )}
+                {match.status === 'live' && (
+                  <div className="mt-2 px-4 py-1 bg-red-100 rounded-full">
+                    <span className="text-sm font-medium text-red-600">{match.minute}'</span>
+                  </div>
+                )}
               </div>
+
               <div className="flex-1">
                 <div className="flex flex-col items-center gap-4">
-                  <div className=" w-24 h-24 rounded-2xl bg-white p-4 shadow-md transform transition-all duration-300 group-hover/team:scale-105 group-hover/team:shadow-lg">
+                  <div className="w-24 h-24 rounded-2xl bg-white p-4 shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                     <img
                       src={match.team2Logo}
+                      alt={match.team2}
                       className="w-full h-full object-contain"
                     />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-800">
-                      {match.team2}
-                    </h3>
+                    <h3 className="text-xl font-bold text-gray-800">{match.team2}</h3>
                     <div className="flex items-center justify-center gap-1 mt-1">
                       <Star size={14} className="text-amber-400 fill-amber-400" />
-                      <span className="text-sm text-gray-500">Home Team</span>
+                      <span className="text-sm text-gray-500">Away</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
           <div className="mt-8 mx-8 p-4 bg-gray-50 rounded-2xl border border-gray-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -110,30 +118,19 @@ function MatchListItem({ match }) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-800">{match.stadium}</p>
+                  <p className="text-xs text-gray-500">Venue</p>
                 </div>
               </div>
             </div>
           </div>
-
           <div className="p-8">
-            <div className="flex gap-4">
-              <Link to={`/matches/${match.id}`}
+          <Link to={`/matches/${match.id}`} state={{ matchData: match }}
                 className="flex-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 rounded-xl 
               py-3 px-6 flex items-center justify-center gap-2 font-medium transition-all duration-300 hover:shadow-md cursor-pointer"
               >
                 <Info size={18} className="text-red-500" />
                 <span>Match Details</span>
               </Link>
-              <Link className='flex-1' to={`/matches/bookticket/${match.id}`}>
-                <button
-                  className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl 
-              py-3 px-6 flex items-center justify-center gap-2 font-medium transition-all duration-300 hover:shadow-md cursor-pointer"
-                >
-                  <Ticket size={18} />
-                  <span>Book Tickets</span>
-                </button>
-              </Link>
-            </div>
           </div>
         </div>
       </div>
@@ -141,4 +138,4 @@ function MatchListItem({ match }) {
   );
 }
 
-export default MatchListItem;
+export default MatchListItemWithScore;
