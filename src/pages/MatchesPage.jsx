@@ -1,107 +1,127 @@
-// src/components/MatchesPage.js
-import React, { useState, useEffect, useMemo } from 'react';
-import { FaFutbol } from 'react-icons/fa';
-import { allMatchData } from '../data/matchData';
-import MatchListItem from '../components/Matches/MatchListItem';
+import React from "react";
+import { FaFutbol, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import MatchListItem from "../components/Matches/MatchListItem";
+import MatchListItemWithScore from "../components/Matches/MatchListItemScore";
+import { useData } from "../components/context/DataContext";
 
 function MatchesPage() {
-  const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('upcoming'); // 'upcoming' or 'results'
+  const {
+    filter,
+    setFilter,
+    searchTerm,
+    setSearchTerm,
+    currentMatches,
+    currentPage,
+    totalPages,
+    handleNextPage,
+    handlePrevPage,
+    renderPaginationButtons,
+    filteredMatches,
+  } = useData();
 
-  // Simulate fetching data
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    const timer = setTimeout(() => {
-      try {
-        // Sort data: Upcoming first, then past matches by date descending
-        const sortedData = [...allMatchData].sort((a, b) => {
-            if (a.status === 'Scheduled' && b.status !== 'Scheduled') return -1;
-            if (a.status !== 'Scheduled' && b.status === 'Scheduled') return 1;
-            // If both same status, sort by date (most recent first for results)
-            const dateA = new Date(a.date.split(' ').reverse().join('-')); // Basic date parsing
-            const dateB = new Date(b.date.split(' ').reverse().join('-'));
-            if(a.status === 'Full-Time') return dateB - dateA; // Desc for results
-            return dateA - dateB; // Asc for upcoming/live
-        });
-        setMatches(sortedData);
-      } catch (err) {
-        setError('Failed to load match data.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }, 300); // Simulate delay
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Filter matches based on the selected filter
-  const filteredMatches = useMemo(() => {
-    if (filter === 'upcoming') {
-      return matches.filter(m => m.status === 'Scheduled' || m.status === 'Live');
-    } else if (filter === 'results') {
-      return matches.filter(m => m.status === 'Full-Time');
-    }
-    return matches; // Should not happen with current filters
-  }, [matches, filter]);
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8 md:py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Header */}
-        <div className="text-center mb-8 md:mb-10">
-          <FaFutbol className="text-5xl md:text-6xl text-red-600 mx-auto mb-3" />
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">
-            Fixtures & Results
-          </h1>
-          <p className="mt-2 text-base text-gray-600">
-            Check out upcoming matches and past results.
-          </p>
+    <div className="bg-white py-12">
+      <div className="max-w-4xl mx-auto px-8">
+        <div className="text-center mb-12">
+          <div className="bg-red-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-200">
+            <FaFutbol className="text-4xl text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Fixtures & Results</h1>
+          <p className="mt-3 text-lg text-gray-600 max-w-md mx-auto">Check out upcoming matches and past results.</p>
+        </div>
+        <div className="mb-8">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaSearch className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by team name..."
+              className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-full shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none text-gray-600"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
+        </div>
+        <div className="flex justify-center mb-10">
+          <div className="rounded-full p-1 bg-gray-100">
+            <button
+              onClick={() => setFilter("upcoming")}
+              className={`px-6 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                filter === "upcoming" ? "bg-red-600 text-white shadow-md transform -translate-y-0.5" : "text-gray-700 hover:text-red-600"
+              }`}
+            >
+              Upcoming
+            </button>
+            <button
+              onClick={() => setFilter("results")}
+              className={`px-6 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                filter === "results" ? "bg-red-600 text-white shadow-md transform -translate-y-0.5" : "text-gray-700 hover:text-red-600"
+              }`}
+            >
+              Results
+            </button>
+          </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex justify-center mb-8">
-           <div className="flex space-x-1 bg-gray-200 p-1 rounded-lg">
-             <button
-               onClick={() => setFilter('upcoming')}
-               className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                 filter === 'upcoming' ? 'bg-white text-gray-800 shadow' : 'text-gray-600 hover:text-gray-800'
-               }`}
-             >
-               Upcoming
-             </button>
-              <button
-               onClick={() => setFilter('results')}
-               className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                 filter === 'results' ? 'bg-white text-gray-800 shadow' : 'text-gray-600 hover:text-gray-800'
-               }`}
-             >
-               Results
-             </button>
-           </div>
-        </div>
-
-        {/* Loading / Error */}
-        {loading && <p className="text-center text-gray-500 py-10">Loading matches...</p>}
-        {error && <p className="text-center text-red-600 py-10">{error}</p>}
-
-        {/* Match List */}
-        {!loading && !error && (
-           <div className="space-y-4 md:space-y-5">
-             {filteredMatches.length > 0 ? (
-               filteredMatches.map(match => (
-                 <MatchListItem key={match.id} match={match} />
-               ))
-             ) : (
-               <p className="text-center text-gray-500 py-10">
-                 No {filter === 'upcoming' ? 'upcoming matches' : 'results'} found.
-               </p>
-             )}
-           </div>
+        {currentMatches.length > 0 ? (
+          <>
+            {filter === "upcoming" ? (
+              <>
+                {currentMatches.map((match) => (
+                  <div
+                    key={match.id}
+                    className="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl rounded-2xl mb-6"
+                  >
+                    <MatchListItem match={match} />
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                {currentMatches.map((match) => (
+                  <div
+                    key={match.id}
+                    className="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl rounded-2xl mb-6"
+                  >
+                    <MatchListItemWithScore match={match} />
+                  </div>
+                ))}
+              </>
+            )}
+            <div className="flex justify-between items-center mt-10 mb-6">
+              <div className="text-sm text-gray-500">
+                Showing {currentPage * 3 - 2}-{Math.min(currentPage * 3, filteredMatches.length)} of {filteredMatches.length} matches
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-full ${currentPage === 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-700 hover:bg-red-100"}`}
+                  aria-label="Previous page"
+                >
+                  <FaChevronLeft className="h-5 w-5" />
+                </button>
+                <div className="flex space-x-1">{renderPaginationButtons()}</div>
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-full ${currentPage === totalPages ? "text-gray-300 cursor-not-allowed" : "text-gray-700 hover:bg-red-100"}`}
+                  aria-label="Next page"
+                >
+                  <FaChevronRight className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-8 bg-gray-50 rounded-xl">
+            <p className="text-gray-500">No matches found. Try adjusting your search or filter.</p>
+          </div>
         )}
       </div>
     </div>
