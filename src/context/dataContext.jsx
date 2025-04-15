@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from "react";
-import { fetchTeams, fetchMatches, fetchShopItems, fetchLeagues, fetchScores, fetchResultsLive, fetchResults } from "../../data/apiService";
+import { fetchTeams, fetchMatches, fetchShopItems, fetchLeagues, fetchScores, fetchResultsLive, fetchResults } from "../data/apiService";
 
 const DataContext = createContext();
 
