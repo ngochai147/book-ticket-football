@@ -12,7 +12,7 @@ function ProductCard({ product }) {
       to={`/shop/${product.id}`}
       className="bg-white rounded-lg shadow-md border border-gray-200 flex flex-col text-center transition duration-300 hover:shadow-xl focus:outline-none"
     >
-      <div className="relative overflow-hidden aspect-square">
+      <div className="relative overflow-hidden astpect-square">
         <img
           src={product.imageUrl}
           className="w-full h-full object-cover"
@@ -30,6 +30,13 @@ function ProductCard({ product }) {
         <p className="text-lg font-semibold text-red-600">
           {formatPrice(product.price)}
         </p>
+        {/* ✅ Add to Cart button */}
+        <button
+          onClick={() => onAddToCart(product)}
+          className="mt-auto bg-red-600 hover:bg-red-700 text-white text-sm py-1.5 px-4 rounded"
+        >
+          Add to Cart
+        </button>
       </div>
     </Link>
   );

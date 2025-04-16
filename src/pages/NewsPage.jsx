@@ -1,20 +1,22 @@
 // src/components/NewsPage.js (or wherever you place your components)
-import React, { useState, useEffect, useMemo } from 'react';
-import { FaNewspaper, FaCalendarAlt, FaFilter, FaSearch } from 'react-icons/fa';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FaCalendarAlt, FaFilter, FaNewspaper, FaSearch } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import allNewsData from "../data/newsData";
 
 // --- Mock Data ---
 // In a real app, fetch this from an API
-const allNewsData = [
-  { id: 1, title: 'Transfer Deadline Day: Winners and Losers', date: '10 Sep 2024', summary: 'A frantic end to the window saw several high-profile moves finalized.', category: 'Transfers', imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=870&auto=format&fit=crop', slug: 'transfer-deadline-winners-losers' },
-  { id: 2, title: 'Managerial Masterclass: Tactical Shifts Paying Off', date: '12 Sep 2024', summary: 'Analysing the tactical tweaks leading teams up the table.', category: 'Analysis', imageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=870&auto=format&fit=crop', slug: 'managerial-masterclass-tactics' },
-  { id: 3, title: 'Injury Update: Key Players Sidelined Ahead of Weekend', date: '14 Sep 2024', summary: 'Several clubs face selection headaches due to recent injuries.', category: 'Team News', imageUrl: 'https://images.unsplash.com/photo-1551958214-211c59d6c4c3?q=80&w=871&auto=format&fit=crop', slug: 'injury-update-weekend-preview' },
-  { id: 4, title: 'VAR Controversy: Another Weekend of Debated Decisions', date: '16 Sep 2024', summary: 'Reviewing the key VAR incidents and their impact on results.', category: 'Match Reports', imageUrl: 'https://images.unsplash.com/photo-1618193139138-89122c1c3bfa?q=80&w=870&auto=format&fit=crop', slug: 'var-controversy-weekend' },
-  { id: 5, title: 'Rising Star: Young Talent Makes Breakthrough', date: '17 Sep 2024', summary: 'Highlighting a promising young player making waves in the league.', category: 'Features', imageUrl: 'https://images.unsplash.com/photo-1553776821-56c18a30a928?q=80&w=870&auto=format&fit=crop', slug: 'rising-star-breakthrough' },
-  { id: 6, title: 'European Nights: Midweek Action Preview', date: '18 Sep 2024', summary: 'Looking ahead to the Champions League and Europa League fixtures.', category: 'Previews', imageUrl: 'https://images.unsplash.com/photo-1598057080189-35064db0c793?q=80&w=774&auto=format&fit=crop', slug: 'european-nights-preview' },
-  { id: 7, title: 'Club Focus: Inside the Training Ground', date: '19 Sep 2024', summary: 'An exclusive look behind the scenes at a top Premier League club.', category: 'Features', imageUrl: 'https://images.unsplash.com/photo-1519861595287-287931eb6c47?q=80&w=870&auto=format&fit=crop', slug: 'club-focus-training' },
-  { id: 8, title: 'Transfer Rumours: January Window Whispers', date: '20 Sep 2024', summary: 'The latest gossip and speculation surrounding potential winter transfers.', category: 'Transfers', imageUrl: 'https://images.unsplash.com/photo-1611892075499-af18c4f54a1a?q=80&w=870&auto=format&fit=crop', slug: 'transfer-rumours-january' },
-  // Add more articles as needed
-];
+// const allNewsData = [
+//   { id: 1, title: 'Transfer Deadline Day: Winners and Losers', date: '10 Sep 2024', summary: 'A frantic end to the window saw several high-profile moves finalized.', category: 'Transfers', imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=870&auto=format&fit=crop', slug: 'transfer-deadline-winners-losers' },
+//   { id: 2, title: 'Managerial Masterclass: Tactical Shifts Paying Off', date: '12 Sep 2024', summary: 'Analysing the tactical tweaks leading teams up the table.', category: 'Analysis', imageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=870&auto=format&fit=crop', slug: 'managerial-masterclass-tactics' },
+//   { id: 3, title: 'Injury Update: Key Players Sidelined Ahead of Weekend', date: '14 Sep 2024', summary: 'Several clubs face selection headaches due to recent injuries.', category: 'Team News', imageUrl: 'https://images.unsplash.com/photo-1551958214-211c59d6c4c3?q=80&w=871&auto=format&fit=crop', slug: 'injury-update-weekend-preview' },
+//   { id: 4, title: 'VAR Controversy: Another Weekend of Debated Decisions', date: '16 Sep 2024', summary: 'Reviewing the key VAR incidents and their impact on results.', category: 'Match Reports', imageUrl: 'https://images.unsplash.com/photo-1618193139138-89122c1c3bfa?q=80&w=870&auto=format&fit=crop', slug: 'var-controversy-weekend' },
+//   { id: 5, title: 'Rising Star: Young Talent Makes Breakthrough', date: '17 Sep 2024', summary: 'Highlighting a promising young player making waves in the league.', category: 'Features', imageUrl: 'https://images.unsplash.com/photo-1553776821-56c18a30a928?q=80&w=870&auto=format&fit=crop', slug: 'rising-star-breakthrough' },
+//   { id: 6, title: 'European Nights: Midweek Action Preview', date: '18 Sep 2024', summary: 'Looking ahead to the Champions League and Europa League fixtures.', category: 'Previews', imageUrl: 'https://images.unsplash.com/photo-1598057080189-35064db0c793?q=80&w=774&auto=format&fit=crop', slug: 'european-nights-preview' },
+//   { id: 7, title: 'Club Focus: Inside the Training Ground', date: '19 Sep 2024', summary: 'An exclusive look behind the scenes at a top Premier League club.', category: 'Features', imageUrl: 'https://images.unsplash.com/photo-1519861595287-287931eb6c47?q=80&w=870&auto=format&fit=crop', slug: 'club-focus-training' },
+//   { id: 8, title: 'Transfer Rumours: January Window Whispers', date: '20 Sep 2024', summary: 'The latest gossip and speculation surrounding potential winter transfers.', category: 'Transfers', imageUrl: 'https://images.unsplash.com/photo-1611892075499-af18c4f54a1a?q=80&w=870&auto=format&fit=crop', slug: 'transfer-rumours-january' },
+//   // Add more articles as needed
+// ];
 
 const ARTICLES_PER_PAGE = 6;
 
@@ -118,7 +120,7 @@ function NewsPage() {
               <FaFilter className="text-gray-500 mr-2" />
               <span className="text-sm font-medium text-gray-700 mr-3">Filter by Category:</span>
             </div>
-             <div className="w-full md:flex-grow grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-2">
+              <div className="w-full md:flex-grow grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-2">
                 {categories.map(category => (
                   <button
                     key={category}
@@ -164,9 +166,9 @@ function NewsPage() {
                   >
                     <div className="relative aspect-video overflow-hidden"> {/* Fixed aspect ratio */}
                       <img
-                         src={article.imageUrl || 'https://via.placeholder.com/400x225.png?text=News'}
-                         alt={article.title}
-                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          src={article.imageUrl || 'https://via.placeholder.com/400x225.png?text=News'}
+                          alt={article.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                       <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold uppercase px-1.5 py-0.5 rounded z-10">
                           {article.category}
@@ -182,13 +184,19 @@ function NewsPage() {
                       </div>
                       <p className="text-sm text-gray-600 mb-4 flex-grow">{article.summary}</p>
                       {/* --- Use Link from React Router here in a real app --- */}
-                      <a
+                      <Link
+                        to={`/news/${article.slug}`}
+                        className="mt-auto text-sm text-red-600 hover:text-red-800 font-medium self-start group/link"
+                      >
+                      Read More <span className="transition-transform duration-200 inline-block group-hover/link:translate-x-1">→</span>
+                      </Link>
+                      {/* <a
                         href={`#`} // Replace with `/news/${article.slug}` or similar
                         // onClick={(e) => e.preventDefault()} // Prevent default for demo
                         className="mt-auto text-sm text-red-600 hover:text-red-800 font-medium self-start group/link"
                       >
                         Read More <span className="transition-transform duration-200 inline-block group-hover/link:translate-x-1">→</span>
-                      </a>
+                      </a> */}
                     </div>
                   </div>
                 ))}
@@ -217,7 +225,7 @@ function NewsPage() {
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
-                   className={`px-4 py-2 text-sm font-medium rounded-md transition ${
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition ${
                     currentPage === totalPages
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
