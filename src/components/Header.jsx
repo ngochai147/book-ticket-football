@@ -19,7 +19,7 @@ function Navbar() {
   const [username, setUsername] = useState("");
 
   const navigate = useNavigate(); // Added useNavigate hook
-  const handleOpenCart= (e) => {
+  const handleOpenCart = (e) => {
     e.preventDefault();
     setShowUserDropdown(false); // Close the dropdown if it's open
     navigate('/shopping-cart'); // Navigate to Cart page
@@ -84,6 +84,11 @@ function Navbar() {
     navigate('/update-profile'); // Navigate to UpdateProfile page
     setShowUserDropdown(false); // Close the dropdown after navigation
   };
+
+  const handleTicketHistory = () => {
+    navigate('/ticket-history'); // Navigate to TicketHistory page
+    setShowUserDropdown(false); // Close the dropdown after navigation
+  }
 
   return (
     <nav className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-4 shadow-lg">
@@ -173,10 +178,13 @@ function Navbar() {
                         <FaUserEdit />
                         <span>Update Profile</span>
                       </button >
-                      <Link to="/tickets" className="flex items-center space-x-3 hover:text-red-500 transition-colors py-2">
+                      <button
+                        onClick={handleTicketHistory}
+                        className="flex items-center space-x-3 hover:text-red-500 transition-colors py-2 w-full text-left"
+                      >
                         <FaTicketAlt />
                         <span>Ticket History</span>
-                      </Link>
+                      </button>
                       <button
                         onClick={handleLogout}
                         className="flex items-center space-x-3 text-red-500 hover:text-red-400 transition-colors py-2 w-full text-left"
