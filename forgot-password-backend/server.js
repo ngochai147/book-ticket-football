@@ -29,18 +29,18 @@ app.post('/api/forgot-password', async (req, res) => {
   try {
     // Giả lập lấy username từ cơ sở dữ liệu
     // Trong thực tế, bạn sẽ truy vấn database để lấy username dựa trên email
-    const newUsername = `user_${Math.random().toString(36).substring(2, 10)}`; // Tạo username ngẫu nhiên
+    const newpassword = `user_${Math.random().toString(36).substring(2, 10)}`; // Tạo username ngẫu nhiên
 
     // Nội dung email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Your New Username',
-      text: `Hello,\n\nYour new password is: ${newUsername}\n\nPlease use this username to log in and reset your password if needed.\n\nBest regards,\nYour App Team`,
+      subject: 'Your New Password',
+      text: `Hello,\n\nYour new password is: ${newpassword}\n\nPlease use this username to log in and reset your password if needed.\n\nBest regards,\nYour App Team`,
       html: `
         <h2>Your New Username</h2>
         <p>Hello,</p>
-        <p>Your new username is: <strong>${newUsername}</strong></p>
+        <p>Your new password is: <strong>${newpassword}</strong></p>
         <p>Please use this username to log in and reset your password if needed.</p>
         <p>Best regards,<br>Your App Team</p>
       `,

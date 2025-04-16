@@ -21,7 +21,7 @@ import WhyRegister from './pages/WhyRegisterPage';
 
 import { CartProvider } from './context/CartContext';
 import { DataProvider } from './context/DataContext'; // Bạn nhớ import nếu có context này
-
+import TicketHistoryPage from './pages/TicketHistoryPage';
 // Các bước booking
 import BookMatchStepFour from './BookTicket/BookMatchStepFour';
 import BookMatchStepOne from './BookTicket/BookMatchStepOne';
@@ -35,6 +35,7 @@ function App() {
         <div className="min-h-screen bg-gray-900">
           <Navbar />
           <Routes>
+          <Route path='/' element={<Home />} />
             <Route path='/home' element={<Home />} />
             <Route path='/matches' element={<MatchesPage />} />
             <Route path='/matches/:id' element={<MatchDetailPage />} />
@@ -54,6 +55,7 @@ function App() {
             <Route path='/highlight' element={<Highlights />} />
             <Route path="/update-profile" element={<UpdateProfile />} />
             <Route path="/shopping-cart" element={<ShoppingCart />} />
+            <Route path="/ticket-history" element={<TicketHistoryPage />} />
           </Routes>
           <Footer />
         </div>
