@@ -6,7 +6,7 @@ import { allShopData } from '../data/shopData';
 // Import the new component
 import ProductCard from '../components/Shop/ProductCard';
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 16;
 
 function ShopPage() {
   const [products, setProducts] = useState([]);
@@ -31,6 +31,39 @@ function ShopPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, []);
+
+
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     setLoading(true);
+  //     setError(null);
+  //     try {
+  //       const res = await fetch('https://fakestoreapi.com/products');
+  //       if (!res.ok) throw new Error('Failed to fetch');
+  //       const data = await res.json();
+  
+  //       // Chuyển đổi dữ liệu nếu cần cho phù hợp với UI của bạn
+  //       const mappedData = data.map(item => ({
+  //         id: item.id,
+  //         name: item.title,
+  //         price: item.price,
+  //         category: item.category,
+  //         image: item.image,
+  //         description: item.description
+  //       }));
+  
+  //       setProducts(mappedData);
+  //     } catch (err) {
+  //       console.error(err);
+  //       setError('Failed to load products from API.');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  
+  //   fetchProducts();
+  // }, []);
+  
 
   // Get unique categories
   const categories = useMemo(() => {
