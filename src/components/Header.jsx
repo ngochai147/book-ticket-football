@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaFutbol, FaBars, FaUser, FaCog, FaMoon, FaSun, FaShoppingCart, FaTicketAlt, FaSignOutAlt, FaUserEdit } from 'react-icons/fa';
+
 import { NavLink, useNavigate } from 'react-router-dom'; // Changed Link to NavLink
+
 import LoginModal from '../pages/LoginPage';
 import avatarImg from '../image/avatar-fb-mac-dinh-51nSxugr.jpg';
 
@@ -18,10 +20,12 @@ function Navbar() {
   const [userAvatar, setUserAvatar] = useState(avatarImg);
   const [username, setUsername] = useState("");
 
-  const navigate = useNavigate();
+
+  const navigate = useNavigate(); 
   const handleOpenCart = (e) => {
     e.preventDefault();
-    setShowUserDropdown(false);
+    setShowUserDropdown(false); 
+
     navigate('/shopping-cart');
   };
   const menuItems = [
@@ -61,10 +65,15 @@ function Navbar() {
   }, [showUserDropdown, showSettings]);
 
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
+
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) alert(`Searching for: ${searchQuery}`);
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setIsMenuOpen(false);
+    }
   };
+  
   const handleLoginSuccess = (userData) => {
     setIsLoggedIn(true);
     setUsername(userData.username);
@@ -84,9 +93,12 @@ function Navbar() {
     if (showSettings) setShowSettings(false);
   };
 
+
+
   const handleUpdateProfile = () => {
-    navigate('/update-profile');
-    setShowUserDropdown(false);
+    navigate('/update-profile'); 
+    setShowUserDropdown(false); 
+
   };
 
   const handleTicketHistory = () => {
@@ -130,7 +142,7 @@ function Navbar() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="bg-gray-700 text-white px-4 py-1.5 rounded-l-full focus:outline-none focus:ring-2 focus:ring-red-500 w-56 transition-all duration-300"
+                className="bg-gray-700 text-white px-4 py-1.5 rounded-l-full focus:outline-none  w-56 transition-all duration-300"
               />
               <button
                 type="submit"
