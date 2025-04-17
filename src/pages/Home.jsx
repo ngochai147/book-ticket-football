@@ -3,8 +3,9 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { useData } from '../context/DataContext'; 
+import { useData } from '../context/DataContext';
 import { Link } from 'react-router-dom';
+import { allShopData } from '../data/shopData';
 import {
   FaTicketAlt,
   FaFutbol,
@@ -15,7 +16,9 @@ import {
   FaEnvelope,
   FaShoppingCart
 } from 'react-icons/fa';
-
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(price);
+};
 function Home() {
   const { heroData, leagueTableData, topScorersData,
     featuredTeamsData, shopItems, latestNewsData, loading } = useData()
@@ -75,12 +78,17 @@ function Home() {
                         </div>
                       </div>
                       <div className="flex flex-row gap-4 justify-start">
-                        <button className="bg-red-600 text-white px-8 py-3 rounded-full flex items-center justify-center hover:bg-red-700 transition-all transform hover:scale-105 shadow-lg">
-                          <FaTicketAlt className="mr-2" /> Book Tickets
-                        </button>
-                        <button className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full hover:bg-white/10 transition-all transform hover:scale-105">
-                          Match Details
-                        </button>
+                        <Link to={`/matches/bookticket/${match.id}`}>
+                          <button className="bg-red-600 text-white px-8 py-3 rounded-full flex items-center justify-center hover:bg-red-700 transition-all transform hover:scale-105 shadow-lg">
+                            <FaTicketAlt className="mr-2" /> Book Tickets
+                          </button>
+                        </Link>
+
+                        <Link to={`/matches/${match.id}`}>
+                          <button className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full hover:bg-white/10 transition-all transform hover:scale-105">
+                            Match Details
+                          </button>
+                        </Link>
                       </div>
                     </div>
                     <div className="w-full md:w-1/2 flex justify-center items-center space-x-4 sm:space-x-10">
@@ -135,12 +143,12 @@ function Home() {
                   </div>
                 </div>
                 <Link to={`/matches/${match.id}`}>
-                <button className="mt-auto  w-full bg-red-500 text-white py-2.5 rounded-full hover:bg-red-600 font-medium">
-                  View Details
-                </button>
+                  <button className="mt-auto  w-full bg-red-500 text-white py-2.5 rounded-full hover:bg-red-600 font-medium">
+                    View Details
+                  </button>
                 </Link>
               </div>
-              
+
             ))}
           </div>
         </div>
@@ -266,9 +274,11 @@ function Home() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <button className="bg-gray-800 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-black transition-colors shadow-md">
-              Browse All News
-            </button>
+            <Link to='/news'>
+              <button className="bg-gray-800 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-black transition-colors shadow-md">
+                Browse All News
+              </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -276,23 +286,28 @@ function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-4xl font-bold text-gray-800 mb-10 text-center">Fan Shop</h2>
           <div className="grid grid-cols-4 gap-8">
-            {shopItems.map((item) => (
+            {allShopData.slice(0, 4).map((item) => (
               <div key={item.id} className="bg-gray-50 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col border border-gray-200">
                 <img src={item.imageUrl} className="w-full h-56 object-cover transition-transform duration-300 hover:scale-95" />
                 <div className="p-5 flex flex-col flex-grow">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2 flex-grow">{item.name}</h3>
-                  <p className="text-xl font-bold text-red-600 mb-4">{item.price}</p>
-                  <button className="mt-auto w-full bg-red-500 text-white py-2 px-4 rounded-full hover:bg-red-600 transition-colors duration-300 flex items-center justify-center font-medium">
-                    <FaShoppingCart className="mr-2" /> View Product
-                  </button>
+                  <p className="text-xl font-bold text-red-600 mb-4">{formatPrice(item.price)}</p>
+                  <Link to={`/shop/${item.id}`}>
+                    <button className="mt-auto w-full bg-red-500 text-white py-2 px-4 rounded-full hover:bg-red-600 transition-colors duration-300 flex items-center justify-center font-medium">
+                      <FaShoppingCart className="mr-2" /> View Product
+                    </button>
+                  </Link>
                 </div>
               </div>
             ))}
+
           </div>
           <div className="text-center mt-12">
-            <button className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-black transition-all transform hover:scale-105 shadow-lg font-semibold">
-              Visit Full Shop
-            </button>
+            <Link to='/shop'>
+              <button className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-black transition-all transform hover:scale-105 shadow-lg font-semibold">
+                Visit Full Shop
+              </button>
+            </Link>
           </div>
         </div>
       </div>

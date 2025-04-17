@@ -187,6 +187,9 @@ export const DataProvider = ({ children }) => {
     loadShopItems();
   }, []);
 
+
+  
+
   const matchesPerPage = 3;
   const indexOfLastMatch = currentPage * matchesPerPage;
   const indexOfFirstMatch = indexOfLastMatch - matchesPerPage;

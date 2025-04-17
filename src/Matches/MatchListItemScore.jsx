@@ -125,7 +125,7 @@ function MatchListItemWithScore({ match}) {
           </div>
           <div className="p-8">
           <Link to={`/matches/${match.id}`} state={{ matchData: match }}
-                className="flex-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 rounded-xl 
+                className="flex-1 bg-white border border-red-500 hover:border-gray-300 text-gray-700 rounded-xl 
               py-3 px-6 flex items-center justify-center gap-2 font-medium transition-all duration-300 hover:shadow-md cursor-pointer"
               >
                 <Info size={18} className="text-red-500" />

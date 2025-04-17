@@ -115,7 +115,7 @@ const BookMatchStepOne = () => {
         <div className="col-span-1">
           <div className="bg-white p-4 rounded-lg shadow-md h-full">
             <div className="flex justify-center mb-4">
-              <img src={`/image-stadium/${stadiumFileName}`} className="rounded-lg" alt={foundMatch.stadium} />
+              <img src={`/image-stadium/${stadiumFileName}`} className="rounded-lg" />
             </div>
             <h3 className="font-bold text-lg mb-2">{foundMatch.stadium}</h3>
             <div className="text-sm text-gray-600 space-y-2">
@@ -153,18 +153,6 @@ const BookMatchStepOne = () => {
                       <div className="text-sm text-gray-600">{seat.description}</div>
                     </div>
                   </div>
-                  {stadium ? (
-                    <div className="text-right">
-                      <div className="text-sm flex items-center justify-end gap-1">
-                        <span className="text-blue-500 font-bold text-lg">
-                          Tickets: {getTicketAvailability(seat.id)}
-                        </span>
-                        
-                      </div>
-                    </div>
-                  ) : (
-                    <span>Loading...</span>
-                  )}
                 </div>
                 <div className="mt-3 pl-10">
                   <div className="text-sm font-medium mb-1">Features:</div>

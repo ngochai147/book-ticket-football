@@ -11,7 +11,6 @@ const BookMatchStepFour = () => {
     const [bookingCode] = useState(() => Math.random().toString(36).substring(2, 10).toUpperCase());
     const [isPrinting, setIsPrinting] = useState(false);
 
-    // Safe data access (kept from previous version)
     const safeStadium = stadium || { ticketPrices: {}, name: 'N/A' };
     const safeTypeSeat = typeSeat || 'standard';
     const safeSeat = seat || 'general';

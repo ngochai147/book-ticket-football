@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaFutbol, FaBars, FaUser, FaCog, FaMoon, FaSun, FaShoppingCart, FaTicketAlt, FaSignOutAlt, FaUserEdit } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { NavLink, useNavigate } from 'react-router-dom'; // Changed Link to NavLink
 import LoginModal from '../pages/LoginPage';
 import avatarImg from '../image/avatar-fb-mac-dinh-51nSxugr.jpg';
 
@@ -18,11 +18,11 @@ function Navbar() {
   const [userAvatar, setUserAvatar] = useState(avatarImg);
   const [username, setUsername] = useState("");
 
-  const navigate = useNavigate(); // Added useNavigate hook
+  const navigate = useNavigate();
   const handleOpenCart = (e) => {
     e.preventDefault();
-    setShowUserDropdown(false); // Close the dropdown if it's open
-    navigate('/shopping-cart'); // Navigate to Cart page
+    setShowUserDropdown(false);
+    navigate('/shopping-cart');
   };
   const menuItems = [
     { name: "Matches", href: "/matches" },
@@ -41,7 +41,12 @@ function Navbar() {
       setUsername(storedUsername);
     }
   }, [isDarkMode]);
-
+  const performSearch = () => {
+    const results = searchTeamsByName(searchQuery);
+    setSearchResults(results);
+    // Additional logic to display or use search results
+    console.log('Search results:', results);
+  };
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showUserDropdown && !event.target.closest('.user-dropdown-container')) {
@@ -79,35 +84,42 @@ function Navbar() {
     if (showSettings) setShowSettings(false);
   };
 
-  // New handler for navigating to Update Profile
   const handleUpdateProfile = () => {
-    navigate('/update-profile'); // Navigate to UpdateProfile page
-    setShowUserDropdown(false); // Close the dropdown after navigation
+    navigate('/update-profile');
+    setShowUserDropdown(false);
   };
 
   const handleTicketHistory = () => {
-    navigate('/ticket-history'); // Navigate to TicketHistory page
-    setShowUserDropdown(false); // Close the dropdown after navigation
+    navigate('/ticket-history');
+    setShowUserDropdown(false);
   }
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    performSearch();
+  };
+  // Active style for NavLink
+  const activeStyle = "text-red-500 scale-110";
+  
   return (
     <nav className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-4 shadow-lg">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between">
-          <Link to="/home" className="flex items-center space-x-4">
+          <NavLink to="/home" className="flex items-center space-x-4">
             <FaFutbol className="text-red-500 text-4xl" />
             <span className="text-2xl font-bold tracking-wider">Sport Club</span>
-          </Link>
+          </NavLink>
 
           <div className="hidden md:flex items-center space-x-8">
             {menuItems.map((item) => (
-              <Link
+              <NavLink
                 key={item.name}
                 to={item.href}
-                className="text-lg transition-all duration-300 hover:text-red-500 hover:scale-110"
+                className={({ isActive }) => 
+                  `text-lg transition-all duration-300 hover:text-red-500 hover:scale-110 ${isActive ? activeStyle : ""}`
+                }
               >
                 {item.name}
-              </Link>
+              </NavLink>
             ))}
           </div>
 
@@ -166,11 +178,10 @@ function Navbar() {
                           <div className="text-xs text-gray-400">Football Fan</div>
                         </div>
                       </div>
-                      <button onClick={handleOpenCart} to="/cart" className="flex items-center space-x-3 hover:text-red-500 transition-colors py-2">
+                      <button onClick={handleOpenCart} className="flex items-center space-x-3 hover:text-red-500 transition-colors py-2">
                         <FaShoppingCart />
                         <span>Shopping Cart</span>
                       </button>
-                      {/* Changed from Link to button with onClick handler */}
                       <button
                         onClick={handleUpdateProfile}
                         className="flex items-center space-x-3 hover:text-red-500 transition-colors py-2 w-full text-left"
@@ -196,64 +207,6 @@ function Navbar() {
                   )}
                 </div>
               )}
-
-              {/* <div className="relative settings-dropdown-container">
-                <button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="text-white hover:text-red-500 text-2xl"
-                >
-                  <FaCog />
-                </button>
-                {showSettings && (
-                  <div className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg z-50 p-4 space-y-4">
-                    <div className="font-bold text-lg">Settings</div>
-                    <div className="flex items-center justify-between">
-                      <span>Theme</span>
-                      <button
-                        onClick={() => setIsDarkMode(!isDarkMode)}
-                        className="text-xl hover:text-yellow-400"
-                      >
-                        {isDarkMode ? <FaMoon /> : <FaSun />}
-                      </button>
-                    </div>
-                    <div>
-                      <label className="block mb-1">Language</label>
-                      <select
-                        className="w-full bg-gray-700 text-white p-2 rounded"
-                        value={language}
-                        onChange={(e) => setLanguage(e.target.value)}
-                      >
-                        <option>English (US)</option>
-                        <option>Tiếng Việt</option>
-                        <option>Français</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block mb-1">Currency</label>
-                      <select
-                        className="w-full bg-gray-700 text-white p-2 rounded"
-                        value={currency}
-                        onChange={(e) => setCurrency(e.target.value)}
-                      >
-                        <option>Euro (EUR)</option>
-                        <option>USD (USD)</option>
-                        <option>VND (₫)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block mb-1">Unit</label>
-                      <select
-                        className="w-full bg-gray-700 text-white p-2 rounded"
-                        value={unit}
-                        onChange={(e) => setUnit(e.target.value)}
-                      >
-                        <option>Metric (cm)</option>
-                        <option>Imperial (inch)</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </div> */}
 
               <div className="md:hidden">
                 <FaBars
@@ -284,14 +237,16 @@ function Navbar() {
                 </button>
               </form>
               {menuItems.map((item) => (
-                <a
+                <NavLink
                   key={item.name}
-                  href={item.href}
-                  className="text-2xl text-white hover:text-red-500 transition-colors duration-300"
+                  to={item.href}
+                  className={({ isActive }) => 
+                    `text-2xl text-white hover:text-red-500 transition-colors duration-300 ${isActive ? "text-red-500" : ""}`
+                  }
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
-                </a>
+                </NavLink>
               ))}
               <button
                 onClick={() => setIsMenuOpen(false)}

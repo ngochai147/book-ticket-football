@@ -8,7 +8,7 @@ const steps = [
 ];
 
 const BookingSteps = ({ currentStep = 1 }) => {
-  const validCurrentStep = Number.isInteger(currentStep) ? currentStep : 1;
+  const validCurrentStep = currentStep ? currentStep : 1;
 
   return (
     <nav className="mb-8 max-w-xl mx-auto px-4">
