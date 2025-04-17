@@ -32,7 +32,7 @@ function ProductCard({ product }) {
         </p>
         {/* ✅ Add to Cart button */}
         <button
-          onClick={() => onAddToCart(product)}
+          
           className="mt-auto bg-red-600 hover:bg-red-700 text-white text-sm py-1.5 px-4 rounded"
         >
           Add to Cart
