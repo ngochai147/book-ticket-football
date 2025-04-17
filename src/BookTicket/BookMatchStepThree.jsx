@@ -16,7 +16,6 @@ const BookMatchStepThree = () => {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Kiểm tra typeSeat và seat trước khi sử dụng
     if (!typeSeat || !seat || !stadium || !stadium.ticketPrices || !stadium.ticketPrices[typeSeat]) {
         console.error("Thiếu dữ liệu cần thiết:", { typeSeat, seat, stadium });
         return <div>Lỗi: Thiếu thông tin vé. Vui lòng quay lại bước trước.</div>;
@@ -41,15 +40,12 @@ const BookMatchStepThree = () => {
         setPaymentMethod(method);
     };
 
-    // --- Handle Submit - Đã bỏ qua validation ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Bỏ qua bước validateForm()
         setIsSubmitting(true);
 
         try {
-            // Chuyển đổi match.time từ "HH:MM AM/PM" sang định dạng 24 giờ
             const timeParts = match.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
             if (!timeParts) {
                 throw new Error("Định dạng thời gian trận đấu không hợp lệ");
@@ -67,7 +63,6 @@ const BookMatchStepThree = () => {
 
             const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 
-            // Tạo matchTime từ match.date và formattedTime
             const [month, day, year] = match.date.split("/");
             const formattedDay = day.padStart(2, "0");
             const formattedMonth = month.padStart(2, "0");
@@ -80,7 +75,6 @@ const BookMatchStepThree = () => {
             // Tạo bookingCode
             const bookingCode = `BK${new Date().getFullYear()}A${Math.floor(1000 + Math.random() * 9000)}`;
 
-            // Chuẩn bị dữ liệu để gửi - Luôn tạo data dù field có rỗng
             const ticketData = {
                 bookingCode,
                 match: {
@@ -100,10 +94,8 @@ const BookMatchStepThree = () => {
                 totalPayment: total || 0,
             };
 
-            // Log dữ liệu để kiểm tra
             console.log("Dữ liệu gửi đi:", ticketData);
 
-            // Gửi request đến backend
             const response = await fetch("http://localhost:3000/api/tickets/create", {
                 method: "POST",
                 headers: {
@@ -178,6 +170,7 @@ const BookMatchStepThree = () => {
                                             <input
                                                 type="text"
                                                 name="fullName"
+                                                placeholder="Enter your full name"
                                                 onChange={handleInputChange}
                                                 className="w-full p-2.5 border rounded-md shadow-sm text-sm"
                                             />
@@ -189,6 +182,7 @@ const BookMatchStepThree = () => {
                                             <input
                                                 type="email"
                                                 name="email"
+                                                placeholder="Enter your email address"
                                                 onChange={handleInputChange}
                                                 className="w-full p-2.5 border rounded-md shadow-sm text-sm"
                                             />
@@ -200,6 +194,7 @@ const BookMatchStepThree = () => {
                                             <input
                                                 type="tel"
                                                 name="phone"
+                                                placeholder="Enter your phone number"
                                                 onChange={handleInputChange}
                                                 className="w-full p-2.5 border rounded-md shadow-sm text-sm"
                                             />
