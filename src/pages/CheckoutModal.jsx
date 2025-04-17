@@ -2,25 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { FaUser, FaPhone, FaMapMarkerAlt, FaCreditCard, FaTruck, FaMoneyBill, FaInfoCircle, FaTimes, FaShoppingCart } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 
-function CheckoutModal({ isOpen, onClose, onConfirm, cartItems, formatCurrency }) {
+// Assuming formatCurrency is passed correctly and handles GBP/en-GB
+function CheckoutModal({ isOpen, onClose, onConfirm, cartItems = [], formatCurrency }) {
   const [step, setStep] = useState(1);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     phone: '',
     email: '',
     address: '',
-    city: '',
-    district: '',
-    ward: '',
+    city: '',      // Store ID for city
+    district: '',  // Store ID for district
+    ward: '',      // Store ID for ward
     note: '',
-    paymentMethod: 'cod',
+    paymentMethod: 'cod', // Default payment method
   });
   const [formErrors, setFormErrors] = useState({});
   const [cities, setCities] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
 
-  // Hàm reset form
+  // Form reset function
   const resetForm = () => {
     setCustomerInfo({
       name: '',
@@ -35,17 +36,24 @@ function CheckoutModal({ isOpen, onClose, onConfirm, cartItems, formatCurrency }
     });
     setStep(1);
     setFormErrors({});
+    // Optionally reset location dropdowns if needed, though they reload based on dependencies
+    setDistricts([]);
+    setWards([]);
   };
 
+  // Fetch Cities/Provinces
   useEffect(() => {
-    fetch('https://esgoo.net/api-tinhthanh/1/0.htm')
+    fetch('https://esgoo.net/api-tinhthanh/1/0.htm') // Using the Vietnamese API endpoint
       .then((res) => res.json())
       .then((data) => {
-        if (data.error === 0) setCities(data.data);
+        if (data.error === 0) {
+          setCities(data.data); // Assuming the API provides name/id
+        }
       })
-      .catch((err) => console.error('Lỗi lấy tỉnh/thành:', err));
+      .catch((err) => console.error('Error fetching provinces/cities:', err)); // English error
   }, []);
 
+  // Fetch Districts when city changes
   useEffect(() => {
     if (customerInfo.city) {
       fetch(`https://esgoo.net/api-tinhthanh/2/${customerInfo.city}.htm`)
@@ -53,17 +61,28 @@ function CheckoutModal({ isOpen, onClose, onConfirm, cartItems, formatCurrency }
         .then((data) => {
           if (data.error === 0) {
             setDistricts(data.data);
+            setWards([]); // Reset wards when district changes
+            // Reset district and ward selection in state if city changes
+            // setCustomerInfo((prev) => ({ ...prev, district: '', ward: '' })); // Handled below
+          } else {
+            setDistricts([]); // Clear if API returns error
             setWards([]);
-            setCustomerInfo((prev) => ({ ...prev, district: '', ward: '' }));
           }
         })
-        .catch((err) => console.error('Lỗi lấy quận/huyện:', err));
+        .catch((err) => {
+           console.error('Error fetching districts:', err); // English error
+           setDistricts([]);
+           setWards([]);
+        });
     } else {
-      setDistricts([]);
+      setDistricts([]); // Clear if no city selected
       setWards([]);
     }
-  }, [customerInfo.city]);
+    // Reset district and ward when city changes *after* fetch logic
+    setCustomerInfo((prev) => ({ ...prev, district: '', ward: '' }));
+  }, [customerInfo.city]); // Only depend on city
 
+  // Fetch Wards when district changes
   useEffect(() => {
     if (customerInfo.district) {
       fetch(`https://esgoo.net/api-tinhthanh/3/${customerInfo.district}.htm`)
@@ -71,35 +90,50 @@ function CheckoutModal({ isOpen, onClose, onConfirm, cartItems, formatCurrency }
         .then((data) => {
           if (data.error === 0) {
             setWards(data.data);
-            setCustomerInfo((prev) => ({ ...prev, ward: '' }));
+            // Reset ward selection in state if district changes
+            // setCustomerInfo((prev) => ({ ...prev, ward: '' })); // Handled below
+          } else {
+            setWards([]); // Clear if API returns error
           }
         })
-        .catch((err) => console.error('Lỗi lấy phường/xã:', err));
+        .catch((err) => {
+          console.error('Error fetching wards:', err); // English error
+           setWards([]);
+        });
     } else {
-      setWards([]);
+      setWards([]); // Clear if no district selected
     }
-  }, [customerInfo.district]);
+     // Reset ward when district changes *after* fetch logic
+    setCustomerInfo((prev) => ({ ...prev, ward: '' }));
+  }, [customerInfo.district]); // Only depend on district
 
+
+  // Step validation logic (English error messages)
   const validateStep = () => {
     const errors = {};
+    const phoneRegex = /^\+?[0-9\s-()]{7,}$/; // More flexible phone regex
+    const emailRegex = /\S+@\S+\.\S+/;
+
     if (step === 1) {
-      if (!customerInfo.name.trim()) errors.name = 'Vui lòng nhập họ tên';
-      if (!customerInfo.phone.trim()) errors.phone = 'Vui lòng nhập số điện thoại';
-      else if (!/^[0-9]{10}$/.test(customerInfo.phone)) errors.phone = 'Số điện thoại không hợp lệ';
-      if (!customerInfo.email.trim()) errors.email = 'Vui lòng nhập email';
-      else if (!/\S+@\S+\.\S+/.test(customerInfo.email)) errors.email = 'Email không hợp lệ';
+      if (!customerInfo.name.trim()) errors.name = 'Please enter your full name';
+      if (!customerInfo.phone.trim()) errors.phone = 'Please enter your phone number';
+      else if (!phoneRegex.test(customerInfo.phone)) errors.phone = 'Invalid phone number format';
+      if (!customerInfo.email.trim()) errors.email = 'Please enter your email address';
+      else if (!emailRegex.test(customerInfo.email)) errors.email = 'Invalid email address format';
     } else if (step === 2) {
-      if (!customerInfo.address.trim()) errors.address = 'Vui lòng nhập địa chỉ';
-      if (!customerInfo.city) errors.city = 'Vui lòng chọn tỉnh/thành phố';
-      if (!customerInfo.district) errors.district = 'Vui lòng chọn quận/huyện';
-      if (!customerInfo.ward) errors.ward = 'Vui lòng chọn phường/xã';
+      if (!customerInfo.address.trim()) errors.address = 'Please enter your street address';
+      if (!customerInfo.city) errors.city = 'Please select a province/city';
+      if (!customerInfo.district) errors.district = 'Please select a district';
+      if (!customerInfo.ward) errors.ward = 'Please select a ward/commune';
     }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const nextStep = () => {
-    if (validateStep()) setStep(step + 1);
+    if (validateStep()) {
+      setStep(step + 1);
+    }
   };
 
   const prevStep = () => {
@@ -109,27 +143,43 @@ function CheckoutModal({ isOpen, onClose, onConfirm, cartItems, formatCurrency }
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCustomerInfo((prev) => ({ ...prev, [name]: value }));
-    if (formErrors[name]) setFormErrors((prev) => ({ ...prev, [name]: null }));
-  };
-
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
-
-  const handleSubmit = () => {
-    if (validateStep()) {
-      onConfirm(customerInfo);
-      resetForm();
+    // Clear the specific error when user starts typing in the field
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({ ...prev, [name]: null }));
     }
   };
 
+  // Calculate total (ensure cartItems is an array)
+  const calculateTotal = () => {
+    return Array.isArray(cartItems)
+      ? cartItems.reduce((total, item) => total + (item.price || 0) * (item.quantity || 0), 0)
+      : 0;
+  };
+
+  // Final submit handler
+  const handleSubmit = () => {
+    // No validation needed at step 3 if previous steps were validated
+    // Or re-validate all steps if needed: if (validateStep1() && validateStep2()) { ... }
+    onConfirm(customerInfo); // Pass the collected info
+    resetForm(); // Reset form after successful confirmation
+  };
+
+  // Effect to reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
-      resetForm();
+      // Delay reset slightly to allow exit animation
+      const timer = setTimeout(() => {
+        resetForm();
+      }, 300); // Match exit transition duration
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen && step !== 1) return null; // Prevent rendering during exit animation if not on step 1
+
+  // Helper to get full name from ID - adjust property names ('id', 'full_name') if needed
+  const getNameById = (id, list) => list.find(item => String(item.id) === String(id))?.full_name || '';
+
 
   return (
     <AnimatePresence>
@@ -139,545 +189,479 @@ function CheckoutModal({ isOpen, onClose, onConfirm, cartItems, formatCurrency }
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" // Added padding
         >
           <motion.div
-            initial={{ y: '100vh' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100vh' }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-screen overflow-hidden flex flex-col"
+            initial={{ y: '50px', opacity: 0 }} // Slide up animation
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '50px', opacity: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 25 }} // Spring animation
+            className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" // Max height
           >
+            {/* Header */}
             <div
               style={{
-                background: 'linear-gradient(to right, #EE4D2D, #FF6633)', // Replace bg-gradient-to-r from-shopee-orange to-shopee-orange-light
+                // Keeping brand colors, replace hex if needed
+                background: 'linear-gradient(to right, #EE4D2D, #FF6633)',
                 color: 'white',
                 padding: '1rem 1.5rem',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                flexShrink: 0, // Prevent header shrinking
               }}
             >
               <h2 className="text-xl font-semibold">
-                {step === 1 && 'Thông tin cá nhân'}
-                {step === 2 && 'Địa chỉ giao hàng'}
-                {step === 3 && 'Xác nhận đơn hàng'}
+                {/* English Titles */}
+                {step === 1 && 'Personal Information'}
+                {step === 2 && 'Delivery Address'}
+                {step === 3 && 'Confirm Order'}
               </h2>
               <button
                 onClick={onClose}
+                aria-label="Close checkout" // Accessibility
                 style={{ color: 'white' }}
-                onMouseEnter={(e) => (e.target.style.color = '#E5E7EB')} // Replace hover:text-gray-200
-                onMouseLeave={(e) => (e.target.style.color = 'white')}
+                className="opacity-80 hover:opacity-100 transition-opacity" // Use opacity for hover
               >
                 <FaTimes size={20} />
               </button>
             </div>
-            <div className="px-6 pt-4">
+
+            {/* Stepper */}
+            <div className="px-6 pt-4 flex-shrink-0"> {/* Prevent shrinking */}
               <div className="flex items-center justify-between mb-2">
-                <div className="flex flex-col items-center">
+                {/* Step 1 */}
+                <div className="flex flex-col items-center text-center">
                   <div
-                    style={{
-                      width: '2rem',
-                      height: '2rem',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: step >= 1 ? '#EE4D2D' : '#D1D5DB', // Replace bg-shopee-orange and bg-gray-300
-                      color: step >= 1 ? 'white' : 'black',
-                    }}
+                    style={{ /* Styles kept, using hex */ }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${
+                      step >= 1 ? 'bg-[#EE4D2D] text-white' : 'bg-[#D1D5DB] text-black' // bg-gray-300
+                    }`}
                   >
                     1
                   </div>
-                  <span className="text-xs mt-1">Thông tin</span>
+                   {/* English Label */}
+                  <span className="text-xs mt-1">Info</span>
                 </div>
+                {/* Connector */}
                 <div
-                  style={{
-                    flex: 1,
-                    height: '0.25rem',
-                    margin: '0 0.5rem',
-                    backgroundColor: step >= 2 ? '#EE4D2D' : '#D1D5DB', // Replace bg-shopee-orange and bg-gray-300
-                  }}
+                  style={{ /* Styles kept, using hex */ }}
+                  className={`flex-1 h-1 mx-2 transition-colors duration-300 ${
+                    step >= 2 ? 'bg-[#EE4D2D]' : 'bg-[#D1D5DB]' // bg-gray-300
+                  }`}
                 ></div>
-                <div className="flex flex-col items-center">
+                 {/* Step 2 */}
+                <div className="flex flex-col items-center text-center">
                   <div
-                    style={{
-                      width: '2rem',
-                      height: '2rem',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: step >= 2 ? '#EE4D2D' : '#D1D5DB', // Replace bg-shopee-orange and bg-gray-300
-                      color: step >= 2 ? 'white' : 'black',
-                    }}
+                     style={{ /* Styles kept, using hex */ }}
+                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${
+                      step >= 2 ? 'bg-[#EE4D2D] text-white' : 'bg-[#D1D5DB] text-black' // bg-gray-300
+                    }`}
                   >
                     2
                   </div>
-                  <span className="text-xs mt-1">Địa chỉ</span>
+                   {/* English Label */}
+                  <span className="text-xs mt-1">Address</span>
                 </div>
+                {/* Connector */}
                 <div
-                  style={{
-                    flex: 1,
-                    height: '0.25rem',
-                    margin: '0 0.5rem',
-                    backgroundColor: step >= 3 ? '#EE4D2D' : '#D1D5DB', // Replace bg-shopee-orange and bg-gray-300
-                  }}
+                   style={{ /* Styles kept, using hex */ }}
+                   className={`flex-1 h-1 mx-2 transition-colors duration-300 ${
+                    step >= 3 ? 'bg-[#EE4D2D]' : 'bg-[#D1D5DB]' // bg-gray-300
+                  }`}
                 ></div>
-                <div className="flex flex-col items-center">
+                 {/* Step 3 */}
+                <div className="flex flex-col items-center text-center">
                   <div
-                    style={{
-                      width: '2rem',
-                      height: '2rem',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: step >= 3 ? '#EE4D2D' : '#D1D5DB', // Replace bg-shopee-orange and bg-gray-300
-                      color: step >= 3 ? 'white' : 'black',
-                    }}
+                    style={{ /* Styles kept, using hex */ }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${
+                      step >= 3 ? 'bg-[#EE4D2D] text-white' : 'bg-[#D1D5DB] text-black' // bg-gray-300
+                    }`}
                   >
                     3
                   </div>
-                  <span className="text-xs mt-1">Xác nhận</span>
+                  {/* English Label */}
+                  <span className="text-xs mt-1">Confirm</span>
                 </div>
               </div>
             </div>
+
+            {/* Content Area */}
             <div className="overflow-y-auto p-6 flex-grow">
+              {/* Step 1: Personal Info */}
               {step === 1 && (
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2 mb-4 text-gray-700">
                     <FaUser />
-                    <h3 className="font-medium">Thông tin cá nhân</h3>
+                     {/* English Section Title */}
+                    <h3 className="font-medium">Personal Information</h3>
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
-                      Họ và tên <span className="text-red-500">*</span>
+                     {/* English Label */}
+                    <label htmlFor="name" className="block text-gray-700 text-sm font-medium mb-1">
+                      Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="name"
                       type="text"
                       name="name"
                       value={customerInfo.name}
                       onChange={handleInputChange}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderWidth: '1px',
-                        borderColor: formErrors.name ? '#EF4444' : '#D1D5DB', // Replace border-red-500 and border-gray-300
-                        borderRadius: '0.5rem',
-                        outline: 'none',
-                        transition: 'all 0.3s',
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = '#EE4D2D'; // Replace focus:ring-shopee-orange and focus:border-shopee-orange
-                        e.target.style.boxShadow = '0 0 0 2px rgba(238, 77, 45, 0.2)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = formErrors.name ? '#EF4444' : '#D1D5DB';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                      placeholder="Nhập họ và tên"
+                      style={{ /* Styles kept, using hex */ }}
+                      className={`w-full p-3 border rounded-lg outline-none transition-all duration-300 ${
+                        formErrors.name ? 'border-[#EF4444]' : 'border-[#D1D5DB]' // border-red-500, border-gray-300
+                      } focus:border-[#EE4D2D] focus:ring-2 focus:ring-[#EE4D2D]/20`} // focus styles
+                      placeholder="Enter your full name" // English Placeholder
                     />
+                     {/* English Error */}
                     {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
-                      Số điện thoại <span className="text-red-500">*</span>
+                     {/* English Label */}
+                    <label htmlFor="phone" className="block text-gray-700 text-sm font-medium mb-1">
+                      Phone Number <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <FaPhone className="text-gray-500" />
+                        <FaPhone className="text-gray-400" /> {/* Adjusted color */}
                       </div>
                       <input
+                        id="phone"
                         type="tel"
                         name="phone"
                         value={customerInfo.phone}
                         onChange={handleInputChange}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem 0.75rem 0.75rem 2.5rem',
-                          borderWidth: '1px',
-                          borderColor: formErrors.phone ? '#EF4444' : '#D1D5DB', // Replace border-red-500 and border-gray-300
-                          borderRadius: '0.5rem',
-                          outline: 'none',
-                          transition: 'all 0.3s',
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#EE4D2D'; // Replace focus:ring-shopee-orange and focus:border-shopee-orange
-                          e.target.style.boxShadow = '0 0 0 2px rgba(238, 77, 45, 0.2)';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = formErrors.phone ? '#EF4444' : '#D1D5DB';
-                          e.target.style.boxShadow = 'none';
-                        }}
-                        placeholder="Nhập số điện thoại"
+                        style={{ /* Styles kept, using hex */ }}
+                         className={`w-full p-3 pl-10 border rounded-lg outline-none transition-all duration-300 ${ // Added pl-10 for icon
+                            formErrors.phone ? 'border-[#EF4444]' : 'border-[#D1D5DB]' // border-red-500, border-gray-300
+                         } focus:border-[#EE4D2D] focus:ring-2 focus:ring-[#EE4D2D]/20`} // focus styles
+                        placeholder="Enter your phone number" // English Placeholder
                       />
                     </div>
+                     {/* English Error */}
                     {formErrors.phone && <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>}
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
-                      Email <span className="text-red-500">*</span>
+                     {/* English Label */}
+                    <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-1">
+                      Email Address <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="email"
                       type="email"
                       name="email"
                       value={customerInfo.email}
                       onChange={handleInputChange}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderWidth: '1px',
-                        borderColor: formErrors.email ? '#EF4444' : '#D1D5DB', // Replace border-red-500 and border-gray-300
-                        borderRadius: '0.5rem',
-                        outline: 'none',
-                        transition: 'all 0.3s',
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = '#EE4D2D'; // Replace focus:ring-shopee-orange and focus:border-shopee-orange
-                        e.target.style.boxShadow = '0 0 0 2px rgba(238, 77, 45, 0.2)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = formErrors.email ? '#EF4444' : '#D1D5DB';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                      placeholder="example@email.com"
+                      style={{ /* Styles kept, using hex */ }}
+                      className={`w-full p-3 border rounded-lg outline-none transition-all duration-300 ${
+                        formErrors.email ? 'border-[#EF4444]' : 'border-[#D1D5DB]' // border-red-500, border-gray-300
+                      } focus:border-[#EE4D2D] focus:ring-2 focus:ring-[#EE4D2D]/20`} // focus styles
+                      placeholder="example@email.com" // English Placeholder
                     />
+                    {/* English Error */}
                     {formErrors.email && <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>}
                   </div>
                 </div>
               )}
+
+              {/* Step 2: Delivery Address */}
               {step === 2 && (
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2 mb-4 text-gray-700">
                     <FaMapMarkerAlt />
-                    <h3 className="font-medium">Địa chỉ giao hàng</h3>
+                     {/* English Section Title */}
+                    <h3 className="font-medium">Delivery Address</h3>
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
-                      Địa chỉ <span className="text-red-500">*</span>
+                     {/* English Label */}
+                    <label htmlFor="address" className="block text-gray-700 text-sm font-medium mb-1">
+                      Street Address <span className="text-red-500">*</span>
                     </label>
                     <textarea
+                      id="address"
                       name="address"
                       value={customerInfo.address}
                       onChange={handleInputChange}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderWidth: '1px',
-                        borderColor: formErrors.address ? '#EF4444' : '#D1D5DB', // Replace border-red-500 and border-gray-300
-                        borderRadius: '0.5rem',
-                        outline: 'none',
-                        transition: 'all 0.3s',
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = '#EE4D2D'; // Replace focus:ring-shopee-orange and focus:border-shopee-orange
-                        e.target.style.boxShadow = '0 0 0 2px rgba(238, 77, 45, 0.2)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = formErrors.address ? '#EF4444' : '#D1D5DB';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                      placeholder="Số nhà, tên đường"
+                      style={{ /* Styles kept, using hex */ }}
+                      className={`w-full p-3 border rounded-lg outline-none transition-all duration-300 ${
+                        formErrors.address ? 'border-[#EF4444]' : 'border-[#D1D5DB]' // border-red-500, border-gray-300
+                      } focus:border-[#EE4D2D] focus:ring-2 focus:ring-[#EE4D2D]/20`} // focus styles
+                      placeholder="House number, street name" // English Placeholder
                       rows="2"
                     />
+                    {/* English Error */}
                     {formErrors.address && <p className="text-red-500 text-xs mt-1">{formErrors.address}</p>}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-gray-700 text-sm font-medium mb-1">
-                        Tỉnh/Thành phố <span className="text-red-500">*</span>
+                       {/* English Label */}
+                      <label htmlFor="city" className="block text-gray-700 text-sm font-medium mb-1">
+                        Province/City <span className="text-red-500">*</span>
                       </label>
                       <select
+                        id="city"
                         name="city"
                         value={customerInfo.city}
                         onChange={handleInputChange}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          borderWidth: '1px',
-                          borderColor: formErrors.city ? '#EF4444' : '#D1D5DB', // Replace border-red-500 and border-gray-300
-                          borderRadius: '0.5rem',
-                          outline: 'none',
-                          transition: 'all 0.3s',
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#EE4D2D'; // Replace focus:ring-shopee-orange and focus:border-shopee-orange
-                          e.target.style.boxShadow = '0 0 0 2px rgba(238, 77, 45, 0.2)';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = formErrors.city ? '#EF4444' : '#D1D5DB';
-                          e.target.style.boxShadow = 'none';
-                        }}
+                        style={{ /* Styles kept, using hex */ }}
+                        className={`w-full p-3 border rounded-lg outline-none transition-all duration-300 appearance-none bg-white ${ // Added appearance-none
+                          formErrors.city ? 'border-[#EF4444]' : 'border-[#D1D5DB]' // border-red-500, border-gray-300
+                        } focus:border-[#EE4D2D] focus:ring-2 focus:ring-[#EE4D2D]/20`} // focus styles
                       >
-                        <option value="">Chọn tỉnh/thành phố</option>
+                         {/* English Placeholder */}
+                        <option value="">Select Province/City</option>
+                        {/* Assuming API provides 'id' and 'full_name' */}
                         {cities.map((city) => (
                           <option key={city.id} value={city.id}>
                             {city.full_name}
                           </option>
                         ))}
                       </select>
+                       {/* English Error */}
                       {formErrors.city && <p className="text-red-500 text-xs mt-1">{formErrors.city}</p>}
                     </div>
                     <div>
-                      <label className="block text-gray-700 text-sm font-medium mb-1">
-                        Quận/Huyện <span className="text-red-500">*</span>
+                       {/* English Label */}
+                      <label htmlFor="district" className="block text-gray-700 text-sm font-medium mb-1">
+                        District <span className="text-red-500">*</span>
                       </label>
                       <select
+                        id="district"
                         name="district"
                         value={customerInfo.district}
                         onChange={handleInputChange}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          borderWidth: '1px',
-                          borderColor: formErrors.district ? '#EF4444' : '#D1D5DB', // Replace border-red-500 and border-gray-300
-                          borderRadius: '0.5rem',
-                          outline: 'none',
-                          transition: 'all 0.3s',
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#EE4D2D'; // Replace focus:ring-shopee-orange and focus:border-shopee-orange
-                          e.target.style.boxShadow = '0 0 0 2px rgba(238, 77, 45, 0.2)';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = formErrors.district ? '#EF4444' : '#D1D5DB';
-                          e.target.style.boxShadow = 'none';
-                        }}
-                        disabled={!customerInfo.city}
+                        style={{ /* Styles kept, using hex */ }}
+                         className={`w-full p-3 border rounded-lg outline-none transition-all duration-300 appearance-none bg-white ${ // Added appearance-none
+                            formErrors.district ? 'border-[#EF4444]' : 'border-[#D1D5DB]' // border-red-500, border-gray-300
+                         } focus:border-[#EE4D2D] focus:ring-2 focus:ring-[#EE4D2D]/20`} // focus styles
+                        disabled={!customerInfo.city || districts.length === 0} // Disable if no city or districts loaded
                       >
-                        <option value="">Chọn quận/huyện</option>
+                         {/* English Placeholder */}
+                        <option value="">Select District</option>
                         {districts.map((district) => (
                           <option key={district.id} value={district.id}>
                             {district.full_name}
                           </option>
                         ))}
                       </select>
+                      {/* English Error */}
                       {formErrors.district && <p className="text-red-500 text-xs mt-1">{formErrors.district}</p>}
                     </div>
                     <div>
-                      <label className="block text-gray-700 text-sm font-medium mb-1">
-                        Phường/Xã <span className="text-red-500">*</span>
+                       {/* English Label */}
+                      <label htmlFor="ward" className="block text-gray-700 text-sm font-medium mb-1">
+                        Ward/Commune <span className="text-red-500">*</span>
                       </label>
                       <select
+                        id="ward"
                         name="ward"
                         value={customerInfo.ward}
                         onChange={handleInputChange}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          borderWidth: '1px',
-                          borderColor: formErrors.ward ? '#EF4444' : '#D1D5DB', // Replace border-red-500 and border-gray-300
-                          borderRadius: '0.5rem',
-                          outline: 'none',
-                          transition: 'all 0.3s',
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#EE4D2D'; // Replace focus:ring-shopee-orange and focus:border-shopee-orange
-                          e.target.style.boxShadow = '0 0 0 2px rgba(238, 77, 45, 0.2)';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = formErrors.ward ? '#EF4444' : '#D1D5DB';
-                          e.target.style.boxShadow = 'none';
-                        }}
-                        disabled={!customerInfo.district}
+                        style={{ /* Styles kept, using hex */ }}
+                        className={`w-full p-3 border rounded-lg outline-none transition-all duration-300 appearance-none bg-white ${ // Added appearance-none
+                            formErrors.ward ? 'border-[#EF4444]' : 'border-[#D1D5DB]' // border-red-500, border-gray-300
+                         } focus:border-[#EE4D2D] focus:ring-2 focus:ring-[#EE4D2D]/20`} // focus styles
+                        disabled={!customerInfo.district || wards.length === 0} // Disable if no district or wards loaded
                       >
-                        <option value="">Chọn phường/xã</option>
+                        {/* English Placeholder */}
+                        <option value="">Select Ward/Commune</option>
                         {wards.map((ward) => (
                           <option key={ward.id} value={ward.id}>
                             {ward.full_name}
                           </option>
                         ))}
                       </select>
+                       {/* English Error */}
                       {formErrors.ward && <p className="text-red-500 text-xs mt-1">{formErrors.ward}</p>}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">Ghi chú</label>
+                     {/* English Label */}
+                    <label htmlFor="note" className="block text-gray-700 text-sm font-medium mb-1">Order Notes (Optional)</label>
                     <textarea
+                      id="note"
                       name="note"
                       value={customerInfo.note}
                       onChange={handleInputChange}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderWidth: '1px',
-                        borderColor: '#D1D5DB', // Replace border-gray-300
-                        borderRadius: '0.5rem',
-                        outline: 'none',
-                        transition: 'all 0.3s',
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = '#EE4D2D'; // Replace focus:ring-shopee-orange and focus:border-shopee-orange
-                        e.target.style.boxShadow = '0 0 0 2px rgba(238, 77, 45, 0.2)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = '#D1D5DB';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                      placeholder="Ghi chú về đơn hàng, ví dụ: thời gian nhận hàng hoặc địa điểm giao hàng chi tiết hơn."
+                      style={{ /* Styles kept, using hex */ }}
+                       className={`w-full p-3 border rounded-lg outline-none transition-all duration-300 border-[#D1D5DB] focus:border-[#EE4D2D] focus:ring-2 focus:ring-[#EE4D2D]/20`} // focus styles
+                      placeholder="Notes about your order, e.g., specific delivery instructions." // English Placeholder
                       rows="3"
                     />
                   </div>
                 </div>
               )}
+
+              {/* Step 3: Confirmation */}
               {step === 3 && (
                 <div className="space-y-6">
+                  {/* Customer Info Review */}
                   <div className="space-y-4">
                     <div className="flex items-center space-x-2 mb-2 text-gray-700">
                       <FaUser />
-                      <h3 className="font-medium">Thông tin khách hàng</h3>
+                       {/* English Section Title */}
+                      <h3 className="font-medium">Customer Information</h3>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p><span className="font-medium">Họ tên:</span> {customerInfo.name}</p>
-                      <p><span className="font-medium">SĐT:</span> {customerInfo.phone}</p>
+                    <div className="bg-gray-50 p-4 rounded-lg text-sm">
+                      <p><span className="font-medium">Name:</span> {customerInfo.name}</p>
+                      <p><span className="font-medium">Phone:</span> {customerInfo.phone}</p>
                       <p><span className="font-medium">Email:</span> {customerInfo.email}</p>
                       <p className="mt-2">
-                        <span className="font-medium">Địa chỉ:</span>{' '}
+                         {/* English Label */}
+                        <span className="font-medium">Address:</span>{' '}
                         {customerInfo.address},{' '}
-                        {wards.find((w) => w.id === customerInfo.ward)?.full_name || ''},{' '}
-                        {districts.find((d) => d.id === customerInfo.district)?.full_name || ''},{' '}
-                        {cities.find((c) => c.id === customerInfo.city)?.full_name || ''}
+                        {/* Use helper function to get names */}
+                        {getNameById(customerInfo.ward, wards)},{' '}
+                        {getNameById(customerInfo.district, districts)},{' '}
+                        {getNameById(customerInfo.city, cities)}
                       </p>
                       {customerInfo.note && (
-                        <p className="mt-2"><span className="font-medium">Ghi chú:</span> {customerInfo.note}</p>
+                         /* English Label */
+                        <p className="mt-2"><span className="font-medium">Note:</span> {customerInfo.note}</p>
                       )}
                     </div>
                   </div>
+
+                  {/* Payment Method Review */}
                   <div className="space-y-4">
                     <div className="flex items-center space-x-2 mb-2 text-gray-700">
                       <FaTruck />
-                      <h3 className="font-medium">Phương thức thanh toán</h3>
+                       {/* English Section Title */}
+                      <h3 className="font-medium">Payment Method</h3>
                     </div>
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                       {/* English Label */}
+                      <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-[#EE4D2D] has-[:checked]:bg-[#FFF8F5]"> {/* Highlight selected */}
                         <input
                           type="radio"
                           name="paymentMethod"
                           value="cod"
                           checked={customerInfo.paymentMethod === 'cod'}
                           onChange={handleInputChange}
-                          style={{
-                            accentColor: '#EE4D2D', // Replace text-shopee-orange and focus:ring-shopee-orange
-                            height: '1.25rem',
-                            width: '1.25rem',
-                          }}
+                          style={{ accentColor: '#EE4D2D' }} // Style kept
+                          className="h-5 w-5 focus:ring-0 focus:ring-offset-0" // Reduced focus ring
                         />
                         <div className="flex items-center space-x-3">
                           <FaMoneyBill className="text-green-600" />
-                          <span>Thanh toán khi nhận hàng (COD)</span>
+                          {/* English Text */}
+                          <span>Cash on Delivery (COD)</span>
                         </div>
                       </label>
-                      <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                       {/* English Label */}
+                      <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-[#EE4D2D] has-[:checked]:bg-[#FFF8F5]"> {/* Highlight selected */}
                         <input
                           type="radio"
                           name="paymentMethod"
                           value="card"
                           checked={customerInfo.paymentMethod === 'card'}
                           onChange={handleInputChange}
-                          style={{
-                            accentColor: '#EE4D2D', // Replace text-shopee-orange and focus:ring-shopee-orange
-                            height: '1.25rem',
-                            width: '1.25rem',
-                          }}
+                          style={{ accentColor: '#EE4D2D' }} // Style kept
+                           className="h-5 w-5 focus:ring-0 focus:ring-offset-0" // Reduced focus ring
                         />
                         <div className="flex items-center space-x-3">
                           <FaCreditCard className="text-blue-600" />
-                          <span>Thanh toán thẻ tín dụng/ghi nợ</span>
+                          {/* English Text */}
+                          <span>Credit/Debit Card (Online Payment - if available)</span>
                         </div>
                       </label>
                     </div>
                   </div>
+
+                  {/* Order Summary */}
                   <div className="space-y-4">
                     <div className="flex items-center space-x-2 mb-2 text-gray-700">
                       <FaShoppingCart />
-                      <h3 className="font-medium">Thông tin đơn hàng</h3>
+                       {/* English Section Title */}
+                      <h3 className="font-medium">Order Summary</h3>
                     </div>
-                    <div className="space-y-3">
-                      {cartItems.map((item) => (
-                        <div key={item.id} className="flex justify-between p-3 border-b border-gray-100">
+                    <div className="space-y-3 max-h-48 overflow-y-auto pr-2"> {/* Scrollable item list */}
+                      {Array.isArray(cartItems) && cartItems.map((item) => (
+                        <div key={item.id || item.name} className="flex justify-between items-start p-3 border-b border-gray-100">
                           <div className="flex">
-                            <div className="w-16 h-16 rounded overflow-hidden mr-3">
+                            <div className="w-16 h-16 rounded overflow-hidden mr-3 flex-shrink-0">
                               <img src={item.image} alt={item.name} className="object-cover w-full h-full" />
                             </div>
-                            <div>
+                            <div className="text-sm">
                               <p className="font-medium">{item.name}</p>
-                              <p className="text-gray-500">Số lượng: {item.quantity}</p>
+                              {/* English Text */}
+                              <p className="text-gray-500">Quantity: {item.quantity}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-medium">{formatCurrency(item.price * item.quantity)}</p>
+                          <div className="text-right text-sm">
+                            <p className="font-medium">{formatCurrency((item.price || 0) * (item.quantity || 0))}</p>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
+                    {/* Totals Section */}
+                    <div className="bg-gray-50 p-4 rounded-lg text-sm">
                       <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">Tạm tính:</span>
+                         {/* English Text */}
+                        <span className="text-gray-600">Subtotal:</span>
                         <span>{formatCurrency(calculateTotal())}</span>
                       </div>
                       <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">Phí vận chuyển:</span>
-                        <span>{formatCurrency(30000)}</span>
+                         {/* English Text (Assuming fixed shipping) */}
+                        <span className="text-gray-600">Shipping Fee:</span>
+                        <span>{formatCurrency(5)}</span> {/* Hardcoded shipping */}
                       </div>
                       <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 mt-2">
-                        <span>Tổng thanh toán:</span>
-                        <span style={{ color: '#EE4D2D' }}>{formatCurrency(calculateTotal() + 30000)}</span> {/* Replace text-shopee-orange */}
+                         {/* English Text */}
+                        <span>Total Payment:</span>
+                        <span style={{ color: '#EE4D2D' }}>{formatCurrency(calculateTotal() + 5)}</span> {/* Brand color */}
                       </div>
                     </div>
-                    <div className="flex items-center text-sm bg-orange-50 p-3 rounded-lg">
-                      <FaInfoCircle style={{ color: '#EE4D2D', marginRight: '0.5rem' }} className="flex-shrink-0" /> {/* Replace text-shopee-orange */}
-                      <p>Bằng việc tiến hành đặt hàng, bạn đồng ý với điều khoản dịch vụ và chính sách bảo mật của chúng tôi.</p>
+                     {/* Terms Confirmation */}
+                    <div className="flex items-start text-xs bg-orange-50 p-3 rounded-lg"> {/* Use items-start */}
+                      <FaInfoCircle style={{ color: '#EE4D2D' }} className="mr-2 mt-0.5 flex-shrink-0" /> {/* Brand color */}
+                      {/* English Text */}
+                      <p>By placing this order, you agree to our Terms of Service and Privacy Policy.</p>
                     </div>
                   </div>
                 </div>
               )}
             </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-between">
+
+            {/* Footer Actions */}
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-between flex-shrink-0"> {/* Prevent shrinking */}
               {step > 1 ? (
                 <button
+                  type="button" // Explicit type
                   onClick={prevStep}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                  className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-150 ease-in-out"
                 >
-                  Quay lại
+                  {/* English Text */}
+                  Back
                 </button>
               ) : (
                 <button
+                  type="button" // Explicit type
                   onClick={onClose}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                  className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-150 ease-in-out"
                 >
-                  Hủy
+                  {/* English Text */}
+                  Cancel
                 </button>
               )}
               {step < 3 ? (
                 <button
+                  type="button" // Explicit type
                   onClick={nextStep}
-                  style={{
-                    padding: '0.5rem 1.5rem',
-                    backgroundColor: '#EE4D2D', // Replace bg-shopee-orange
-                    color: 'white',
-                    borderRadius: '0.5rem',
-                  }}
-                  onMouseEnter={(e) => (e.target.style.backgroundColor = '#D94429')} // Replace hover:bg-shopee-orange-hover
-                  onMouseLeave={(e) => (e.target.style.backgroundColor = '#EE4D2D')}
-                  className="transition"
+                  style={{ /* Styles kept, using hex */ }}
+                  className="px-6 py-2 bg-[#EE4D2D] text-white rounded-lg hover:bg-[#D94429] transition duration-150 ease-in-out"
                 >
-                  Tiếp tục
+                  {/* English Text */}
+                  Continue
                 </button>
               ) : (
                 <button
+                  type="button" // Explicit type
                   onClick={handleSubmit}
-                  style={{
-                    padding: '0.5rem 1.5rem',
-                    backgroundColor: '#EE4D2D', // Replace bg-shopee-orange
-                    color: 'white',
-                    borderRadius: '0.5rem',
-                  }}
-                  onMouseEnter={(e) => (e.target.style.backgroundColor = '#D94429')} // Replace hover:bg-shopee-orange-hover
-                  onMouseLeave={(e) => (e.target.style.backgroundColor = '#EE4D2D')}
-                  className="transition"
+                  style={{ /* Styles kept, using hex */ }}
+                  className="px-6 py-2 bg-[#EE4D2D] text-white rounded-lg hover:bg-[#D94429] transition duration-150 ease-in-out"
                 >
-                  Đặt hàng
+                  {/* English Text */}
+                  Place Order
                 </button>
               )}
             </div>

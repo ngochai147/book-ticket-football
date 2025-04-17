@@ -35,7 +35,7 @@ function App() {
         <div className="min-h-screen bg-gray-900">
           <Navbar />
           <Routes>
-          <Route path='/' element={<Home />} />
+            <Route path='/' element={<Home />} />
             <Route path='/home' element={<Home />} />
             <Route path='/matches' element={<MatchesPage />} />
             <Route path='/matches/:id' element={<MatchDetailPage />} />

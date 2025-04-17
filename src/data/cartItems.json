@@ -1,24 +1,4 @@
 
 [
-    {
-      "id": 1,
-      "name": "Áo thun nam cổ tròn",
-      "price": 150000,
-      "quantity": 2,
-      "image": "https://via.placeholder.com/100"
-    },
-    {
-      "id": 2,
-      "name": "Quần jeans slim fit",
-      "price": 350000,
-      "quantity": 1,
-      "image": "https://via.placeholder.com/100"
-    },
-    {
-      "id": 3,
-      "name": "Áo khoác hoodie unisex",
-      "price": 450000,
-      "quantity": 1,
-      "image": "https://via.placeholder.com/100"
-    }
+   
   ]
